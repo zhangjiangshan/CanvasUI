@@ -18,9 +18,8 @@
     "grunt-contrib-watch": "latest"
   },
   "scripts": {
-    "BS": "npm run build && npm run resume",
-    "resume": "./node_modules/.bin/babel-node index.js --verbose",
-    "build": "./node_modules/.bin/babel view -d static",
+    "debug": "./node_modules/.bin/babel-node --debug-brk=5858 index.js",
+    "start": "./node_modules/.bin/babel-node index.js --verbose",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -33,5 +32,5 @@
     "presets": [
       "es2015"
     ]
-  }
+    }
 }
