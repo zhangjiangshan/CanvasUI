@@ -3,12 +3,14 @@ import {nil} from '../util/Util'
 import View from './View'
 import {drawloop} from './Drawloop'
 import RootView from '../demo/RootView'
+import {Point, Size, Edge, ViewAutoresizing} from './Geometry'
 
 export default class Window extends View {
-    constructor() {
-        super()
+    constructor(x=0, y=0, width=0, height=0) {
+        super(x, y, width, height)
+        this.window = this
         this.backgroundColor = "#00a488"
-        this.size = this.getContext
+        this.rootView = nil
     }
 
     render() {
@@ -18,14 +20,13 @@ export default class Window extends View {
     makeKeyAndVisible() {
         drawloop.keyWindow = this
         const rootView = new RootView()
-        //rootView.size = {width:140, height:140}
+        rootView.size = this.size.copy()
+        this.rootView = rootView
         this.addSubview(rootView)
+    }
 
-        const view1 = new RootView()
-        view1.position = {x:20, y:20}
-        view1.size = {width:40, height:40}
-        view1.backgroundColor = "#ff0099"
-        this.addSubview(view1)
+    _layoutSubviews(oldSize) {
+        super._layoutSubviews(oldSize)
     }
 
     static renderHtml() {
@@ -49,7 +50,6 @@ if (typeof window != 'undefined') {
     console.log("Hell")
     const rooWindow = new Window()
     window.rootWindow = rooWindow
-    rooWindow.makeKeyAndVisible()
 
     function resizeCanvas() {
 		const w = document.body.offsetWidth,
@@ -59,8 +59,9 @@ if (typeof window != 'undefined') {
 		ctx.canvas.width  = w;
 		ctx.canvas.height = h;
         canvas.style.background = "#777099"
-        drawloop.needsForRender()
+        rootWindow.size = new Size(w,h)
 	}
     resizeCanvas()
     window.addEventListener('resize', resizeCanvas, false);
+    rooWindow.makeKeyAndVisible()
 }

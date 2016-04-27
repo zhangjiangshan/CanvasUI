@@ -5,9 +5,11 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
-var _View2 = require("../view/View");
+var _View2 = require('../view/View');
 
 var _View3 = _interopRequireDefault(_View2);
+
+var _Geometry = require('../view/Geometry');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -26,7 +28,8 @@ var RootView = function (_View) {
         var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(RootView).call(this));
 
         _this.backgroundColor = "red";
-        _this.size = { width: 100, height: 100 };
+        _this.autoresizingMask = _Geometry.ViewAutoresizing.FlexibleWidth | _Geometry.ViewAutoresizing.FlexibleHeight | _Geometry.ViewAutoresizing.FlexibleLeftMargin;
+        _this.position = new _Geometry.Point(200, 30);
         console.log("rootView");
         return _this;
     }
@@ -36,7 +39,7 @@ var RootView = function (_View) {
 
 exports.default = RootView;
 
-},{"../view/View":7}],2:[function(require,module,exports){
+},{"../view/Geometry":7,"../view/View":8}],2:[function(require,module,exports){
 "use strict";
 
 var _Array = require("./util/Array");
@@ -44,6 +47,8 @@ var _Array = require("./util/Array");
 var _Array2 = _interopRequireDefault(_Array);
 
 var _Util = require("./util/Util");
+
+var _Geometry = require("./view/Geometry");
 
 var _BaseObject = require("./view/BaseObject");
 
@@ -63,7 +68,7 @@ var _RootView2 = _interopRequireDefault(_RootView);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"./demo/RootView":1,"./util/Array":3,"./util/Util":4,"./view/BaseObject":5,"./view/View":7,"./view/Window":8}],3:[function(require,module,exports){
+},{"./demo/RootView":1,"./util/Array":3,"./util/Util":4,"./view/BaseObject":5,"./view/Geometry":7,"./view/View":8,"./view/Window":9}],3:[function(require,module,exports){
 "use strict";
 
 Array.prototype.indexOfOld = Array.prototype.indexOf;
@@ -96,13 +101,18 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 exports.__Func__ = __Func__;
+exports.copy = copy;
 function __Func__() {
     var ownName = arguments.callee.toString();
     ownName = ownName.substr('function '.length);
     return ownName.substr(0, ownName.indexOf('('));
 }
 
-var nil = exports.nil = {};
+var nil = exports.nil = NaN;
+
+function copy(object) {
+    return Object.assign({}, object);
+}
 
 },{}],5:[function(require,module,exports){
 "use strict";
@@ -209,6 +219,119 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Point = exports.Point = function () {
+    function Point() {
+        var x = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+        var y = arguments.length <= 1 || arguments[1] === undefined ? 0 : arguments[1];
+
+        _classCallCheck(this, Point);
+
+        this.x = x;
+        this.y = y;
+    }
+
+    _createClass(Point, [{
+        key: "valueOf",
+        value: function valueOf() {
+            return JSON.stringify(this);
+        }
+    }, {
+        key: "round",
+        value: function round() {
+            return new Point(Math.round(this.x), Math.round(this.y));
+        }
+    }, {
+        key: "copy",
+        value: function copy() {
+            return new Point(this.x, this.y);
+        }
+    }]);
+
+    return Point;
+}();
+
+var Size = exports.Size = function () {
+    function Size() {
+        var width = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+        var height = arguments.length <= 1 || arguments[1] === undefined ? 0 : arguments[1];
+
+        _classCallCheck(this, Size);
+
+        this.width = width;
+        this.height = height;
+    }
+
+    _createClass(Size, [{
+        key: "valueOf",
+        value: function valueOf() {
+            return JSON.stringify(this);
+        }
+    }, {
+        key: "round",
+        value: function round() {
+            return new Size(Math.round(this.width), Math.round(this.height));
+        }
+    }, {
+        key: "copy",
+        value: function copy() {
+            return new Size(this.width, this.height);
+        }
+    }]);
+
+    return Size;
+}();
+
+var Edge = exports.Edge = function () {
+    function Edge() {
+        var top = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+        var left = arguments.length <= 1 || arguments[1] === undefined ? 0 : arguments[1];
+        var bottom = arguments.length <= 2 || arguments[2] === undefined ? 0 : arguments[2];
+        var right = arguments.length <= 3 || arguments[3] === undefined ? 0 : arguments[3];
+
+        _classCallCheck(this, Edge);
+
+        this.top = top;
+        this.left = left;
+        this.bottom = bottom;
+        this.right = right;
+    }
+
+    _createClass(Edge, [{
+        key: "valueOf",
+        value: function valueOf() {
+            return JSON.stringify(this);
+        }
+    }, {
+        key: "round",
+        value: function round() {
+            return new Edge(Math.round(this.top), Math.round(this.left), Math.round(this.bottom), Math.round(this.right));
+        }
+    }]);
+
+    return Edge;
+}();
+
+var ViewAutoresizing = exports.ViewAutoresizing = {
+    None: 0,
+    FlexibleLeftMargin: 1 << 0,
+    FlexibleWidth: 1 << 1,
+    FlexibleRightMargin: 1 << 2,
+    FlexibleTopMargin: 1 << 3,
+    FlexibleHeight: 1 << 4,
+    FlexibleBottomMargin: 1 << 5
+};
+
+},{}],8:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
 var _BaseObject2 = require('./BaseObject');
 
 var _BaseObject3 = _interopRequireDefault(_BaseObject2);
@@ -216,6 +339,8 @@ var _BaseObject3 = _interopRequireDefault(_BaseObject2);
 var _Util = require('../util/Util.js');
 
 var _Drawloop = require('./Drawloop');
+
+var _Geometry = require('./Geometry');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -229,20 +354,123 @@ var View = function (_BaseObject) {
     _inherits(View, _BaseObject);
 
     function View() {
+        var x = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+        var y = arguments.length <= 1 || arguments[1] === undefined ? 0 : arguments[1];
+        var width = arguments.length <= 2 || arguments[2] === undefined ? 0 : arguments[2];
+        var height = arguments.length <= 3 || arguments[3] === undefined ? 0 : arguments[3];
+
         _classCallCheck(this, View);
 
         var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(View).call(this));
 
         _this._backgroundColor = "#00a488";
-        _this._position = { x: 0, y: 0 };
-        _this._size = { width: 0, height: 0 };
+        _this._position = new _Geometry.Point(x, y);
+        _this._size = new _Geometry.Size(width, height);
         _this.subviews = new Array();
+        _this.autoresizingMask = _Geometry.ViewAutoresizing.None;
         _this.superview = _Util.nil;
         _this.window = _Util.nil;
         return _this;
     }
 
     _createClass(View, [{
+        key: '_layoutSubviews',
+        value: function _layoutSubviews() {
+            var oldSize = arguments.length <= 0 || arguments[0] === undefined ? this.size : arguments[0];
+            var _iteratorNormalCompletion = true;
+            var _didIteratorError = false;
+            var _iteratorError = undefined;
+
+            try {
+                for (var _iterator = this.subviews[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                    var view = _step.value;
+
+                    view._configAutoResizing(oldSize);
+                }
+            } catch (err) {
+                _didIteratorError = true;
+                _iteratorError = err;
+            } finally {
+                try {
+                    if (!_iteratorNormalCompletion && _iterator.return) {
+                        _iterator.return();
+                    }
+                } finally {
+                    if (_didIteratorError) {
+                        throw _iteratorError;
+                    }
+                }
+            }
+
+            this.layoutSubviews();
+        }
+    }, {
+        key: '_configAutoResizing',
+        value: function _configAutoResizing(oldSize) {
+            if (!this.superview) {
+                return;
+            }
+
+            var isFlexLeft = (this.autoresizingMask & _Geometry.ViewAutoresizing.FlexibleLeftMargin) > 0;
+            var isFlexRight = (this.autoresizingMask & _Geometry.ViewAutoresizing.FlexibleRightMargin) > 0;
+            var isFlexWidth = (this.autoresizingMask & _Geometry.ViewAutoresizing.FlexibleWidth) > 0;
+
+            var isFlexTop = (this.autoresizingMask & _Geometry.ViewAutoresizing.FlexibleTopMargin) > 0;
+            var isFlexBottom = (this.autoresizingMask & _Geometry.ViewAutoresizing.FlexibleBottomMargin) > 0;
+            var isFlexHeight = (this.autoresizingMask & _Geometry.ViewAutoresizing.FlexibleHeight) > 0;
+
+            var newPosition = this.position.copy();
+            var newSize = this.size.copy();
+
+            //横向
+            var diffWidth = this.superview.size.width - oldSize.width;
+            var flexNumber = 0;
+            if (isFlexLeft) {
+                flexNumber += 1;
+            }
+            if (isFlexRight) {
+                flexNumber += 1;
+            }
+            if (isFlexWidth) {
+                flexNumber += 1;
+            }
+            if (flexNumber != 0) {
+                var horizontalSpace = Math.round(diffWidth / flexNumber);
+                if (isFlexLeft) {
+                    newPosition.x += horizontalSpace;
+                }
+                if (isFlexWidth) {
+                    newSize.width += horizontalSpace;
+                }
+            }
+            //纵向
+            var diffHeight = this.superview.size.height - oldSize.height;
+            flexNumber = 0;
+            if (isFlexTop) {
+                flexNumber += 1;
+            }
+            if (isFlexBottom) {
+                flexNumber += 1;
+            }
+            if (isFlexHeight) {
+                flexNumber += 1;
+            }
+            if (flexNumber != 0) {
+                var verticalSpace = Math.round(diffHeight / flexNumber);
+                if (isFlexTop) {
+                    newPosition.y += verticalSpace;
+                }
+                if (isFlexHeight) {
+                    newSize.height += verticalSpace;
+                }
+            }
+            this._position = newPosition;
+            this._size = newSize;
+        }
+    }, {
+        key: 'layoutSubviews',
+        value: function layoutSubviews() {}
+    }, {
         key: 'getContext',
         value: function getContext() {
             var canvas = document.getElementById("canvas");
@@ -289,13 +517,37 @@ var View = function (_BaseObject) {
         value: function didMoveToWindow() {
             var newWindow = this.window;
             var setWindow = function setWindow(view) {
-                for (var subview in view.subviews) {
-                    subview.willMoveToWindow(newWindow);
-                    subview.window = newWindow;
-                    subview.didMoveToWindow();
-                    setWindow(subview);
+                var _iteratorNormalCompletion2 = true;
+                var _didIteratorError2 = false;
+                var _iteratorError2 = undefined;
+
+                try {
+                    for (var _iterator2 = view.subviews[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+                        var subview = _step2.value;
+
+                        subview.willMoveToWindow(newWindow);
+                        subview.window = newWindow;
+                        subview.didMoveToWindow();
+                        setWindow(subview);
+                    }
+                } catch (err) {
+                    _didIteratorError2 = true;
+                    _iteratorError2 = err;
+                } finally {
+                    try {
+                        if (!_iteratorNormalCompletion2 && _iterator2.return) {
+                            _iterator2.return();
+                        }
+                    } finally {
+                        if (_didIteratorError2) {
+                            throw _iteratorError2;
+                        }
+                    }
                 }
             };
+            if (newWindow) {
+                this._layoutSubviews(this.size);
+            }
             this._setNeedsRender();
         }
     }, {
@@ -344,27 +596,27 @@ var View = function (_BaseObject) {
                     array.push(_next);
                     _next = _next.superview;
                 }
-                var _iteratorNormalCompletion = true;
-                var _didIteratorError = false;
-                var _iteratorError = undefined;
+                var _iteratorNormalCompletion3 = true;
+                var _didIteratorError3 = false;
+                var _iteratorError3 = undefined;
 
                 try {
-                    for (var _iterator = array.reverse()[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-                        var value = _step.value;
+                    for (var _iterator3 = array.reverse()[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+                        var value = _step3.value;
 
                         convertPoint = { x: convertPoint.x - value.position.x, y: convertPoint.y - value.position.y };
                     }
                 } catch (err) {
-                    _didIteratorError = true;
-                    _iteratorError = err;
+                    _didIteratorError3 = true;
+                    _iteratorError3 = err;
                 } finally {
                     try {
-                        if (!_iteratorNormalCompletion && _iterator.return) {
-                            _iterator.return();
+                        if (!_iteratorNormalCompletion3 && _iterator3.return) {
+                            _iterator3.return();
                         }
                     } finally {
-                        if (_didIteratorError) {
-                            throw _iteratorError;
+                        if (_didIteratorError3) {
+                            throw _iteratorError3;
                         }
                     }
                 }
@@ -392,27 +644,27 @@ var View = function (_BaseObject) {
         value: function _render() {
             console.log('render:' + this.toString());
             this.render();
-            var _iteratorNormalCompletion2 = true;
-            var _didIteratorError2 = false;
-            var _iteratorError2 = undefined;
+            var _iteratorNormalCompletion4 = true;
+            var _didIteratorError4 = false;
+            var _iteratorError4 = undefined;
 
             try {
-                for (var _iterator2 = this.subviews[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-                    var view = _step2.value;
+                for (var _iterator4 = this.subviews[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+                    var view = _step4.value;
 
                     view._render();
                 }
             } catch (err) {
-                _didIteratorError2 = true;
-                _iteratorError2 = err;
+                _didIteratorError4 = true;
+                _iteratorError4 = err;
             } finally {
                 try {
-                    if (!_iteratorNormalCompletion2 && _iterator2.return) {
-                        _iterator2.return();
+                    if (!_iteratorNormalCompletion4 && _iterator4.return) {
+                        _iterator4.return();
                     }
                 } finally {
-                    if (_didIteratorError2) {
-                        throw _iteratorError2;
+                    if (_didIteratorError4) {
+                        throw _iteratorError4;
                     }
                 }
             }
@@ -436,8 +688,10 @@ var View = function (_BaseObject) {
             return this._backgroundColor;
         },
         set: function set(newValue) {
-            this._backgroundColor = newValue;
-            this._checkAndSetNeedsRender();
+            if (this._backgroundColor != newValue) {
+                this._backgroundColor = newValue;
+                this._checkAndSetNeedsRender();
+            }
         }
     }, {
         key: 'position',
@@ -445,8 +699,11 @@ var View = function (_BaseObject) {
             return this._position;
         },
         set: function set(newValue) {
-            this._position = newValue;
-            this._checkAndSetNeedsRender();
+            var newPosition = newValue.round();
+            if (this._position != newPosition) {
+                this._position = newPosition;
+                this._checkAndSetNeedsRender();
+            }
         }
     }, {
         key: 'size',
@@ -454,8 +711,13 @@ var View = function (_BaseObject) {
             return this._size;
         },
         set: function set(newValue) {
-            this._size = newValue;
-            this._checkAndSetNeedsRender();
+            var newSize = newValue.round();
+            var oldSize = this._size;
+            if (oldSize != newSize) {
+                this._size = newSize;
+                this._layoutSubviews(oldSize);
+                this._checkAndSetNeedsRender();
+            }
         }
     }]);
 
@@ -464,7 +726,7 @@ var View = function (_BaseObject) {
 
 exports.default = View;
 
-},{"../util/Util.js":4,"./BaseObject":5,"./Drawloop":6}],8:[function(require,module,exports){
+},{"../util/Util.js":4,"./BaseObject":5,"./Drawloop":6,"./Geometry":7}],9:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -472,6 +734,8 @@ Object.defineProperty(exports, "__esModule", {
 });
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
 var _Util = require('../util/Util');
 
@@ -485,6 +749,8 @@ var _RootView = require('../demo/RootView');
 
 var _RootView2 = _interopRequireDefault(_RootView);
 
+var _Geometry = require('./Geometry');
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -497,12 +763,18 @@ var Window = function (_View) {
     _inherits(Window, _View);
 
     function Window() {
+        var x = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+        var y = arguments.length <= 1 || arguments[1] === undefined ? 0 : arguments[1];
+        var width = arguments.length <= 2 || arguments[2] === undefined ? 0 : arguments[2];
+        var height = arguments.length <= 3 || arguments[3] === undefined ? 0 : arguments[3];
+
         _classCallCheck(this, Window);
 
-        var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Window).call(this));
+        var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Window).call(this, x, y, width, height));
 
+        _this.window = _this;
         _this.backgroundColor = "#00a488";
-        _this.size = _this.getContext;
+        _this.rootView = _Util.nil;
         return _this;
     }
 
@@ -514,14 +786,14 @@ var Window = function (_View) {
         value: function makeKeyAndVisible() {
             _Drawloop.drawloop.keyWindow = this;
             var rootView = new _RootView2.default();
-            //rootView.size = {width:140, height:140}
+            rootView.size = this.size.copy();
+            this.rootView = rootView;
             this.addSubview(rootView);
-
-            var view1 = new _RootView2.default();
-            view1.position = { x: 20, y: 20 };
-            view1.size = { width: 40, height: 40 };
-            view1.backgroundColor = "#ff0099";
-            this.addSubview(view1);
+        }
+    }, {
+        key: '_layoutSubviews',
+        value: function _layoutSubviews(oldSize) {
+            _get(Object.getPrototypeOf(Window.prototype), '_layoutSubviews', this).call(this, oldSize);
         }
     }], [{
         key: 'renderHtml',
@@ -545,16 +817,16 @@ if (typeof window != 'undefined') {
         ctx.canvas.width = w;
         ctx.canvas.height = h;
         canvas.style.background = "#777099";
-        _Drawloop.drawloop.needsForRender();
+        rootWindow.size = new _Geometry.Size(w, h);
     };
 
     console.log("Hell");
     var rooWindow = new Window();
     window.rootWindow = rooWindow;
-    rooWindow.makeKeyAndVisible();
 
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas, false);
+    rooWindow.makeKeyAndVisible();
 }
 
-},{"../demo/RootView":1,"../util/Util":4,"./Drawloop":6,"./View":7}]},{},[2]);
+},{"../demo/RootView":1,"../util/Util":4,"./Drawloop":6,"./Geometry":7,"./View":8}]},{},[2]);

@@ -5,6 +5,8 @@ export default class BaseObject {
 
     }
 
+    
+
     // static init() {
     //     const result = new this()
     //     const handler = {}

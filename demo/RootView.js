@@ -1,11 +1,13 @@
 "use strict"
 import View from '../view/View'
+import {Point, Size, Edge, ViewAutoresizing} from '../view/Geometry'
 
 export default class RootView extends View {
     constructor() {
         super()
         this.backgroundColor  = "red"
-        this.size = {width:100, height:100}
+        this.autoresizingMask = ViewAutoresizing.FlexibleWidth | ViewAutoresizing.FlexibleHeight | ViewAutoresizing.FlexibleLeftMargin
+        this.position = new Point(200, 30)
         console.log("rootView")
     }
 }

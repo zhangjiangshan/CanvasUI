@@ -7,4 +7,8 @@ export function __Func__() {
     return ownName.substr(0, ownName.indexOf('('))
 }
 
-export const nil = {}
+export const nil = NaN
+
+export function copy(object) {
+    return Object.assign({}, object);
+}

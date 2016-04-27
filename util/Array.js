@@ -1,6 +1,5 @@
 "use strict"
 
-
 Array.prototype.indexOfOld=Array.prototype.indexOf
 Array.prototype.indexOf = function(e,fn) {
     if(!fn) {
