@@ -32,9 +32,13 @@ export default class Window extends View {
         return `<!DOCTYPE html>
         <head>
             <title id="title"></title>
+            <style type="text/css">
+	           html,body { background:#fff; height:100%; margin:0; padding:0; overflow:hidden }
+	              canvas { position:absolute; top:0; left:0 }
+            </style>
         </head>
         <body>
-            <canvas id="canvas" position:absolute; top:0; left:0; width:100%; height:100%; background:black;"></canvas>
+            <canvas id="canvas"></canvas>
             <script src="./dist/bundle.js"></script>
 
         <body>`
