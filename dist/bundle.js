@@ -189,18 +189,15 @@ var Drawloop = function () {
             console.log("begin render");
             this.keyWindow._render();
             console.log("end render");
-            this.needsRender = false;
         }
     }, {
         key: "needsForRender",
         value: function needsForRender() {
-            var _this = this;
-
             if (this.needsRender === false) {
                 this.needsRender = true;
-                setTimeout(function () {
-                    _this.render();
-                }, 1);
+                this.render();
+                this.needsRender = false;
+                //setTimeout(() => {this.render()}, 1);
             }
         }
     }]);

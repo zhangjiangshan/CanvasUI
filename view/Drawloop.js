@@ -11,13 +11,14 @@ class Drawloop {
         console.log("begin render")
         this.keyWindow._render()
         console.log("end render")
-        this.needsRender = false
     }
 
     needsForRender() {
         if (this.needsRender === false) {
             this.needsRender = true
-            setTimeout(() => {this.render()}, 1);
+            this.render()
+            this.needsRender = false
+            //setTimeout(() => {this.render()}, 1);
         }
     }
 }
