@@ -2,7 +2,7 @@
 import {nil} from '../util/Util'
 import View from './View'
 import {drawloop} from './Drawloop'
-import RootView from '../demo/RootView'
+import RootView from '../main/RootView'
 import {Point, Size, Edge, ViewAutoresizing} from './Geometry'
 
 export default class Window extends View {
@@ -13,8 +13,14 @@ export default class Window extends View {
         this.rootView = nil
     }
 
-    render() {
+    render(context) {
 
+    }
+
+    _render() {
+        const ctx = this.getContext()
+        ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height)
+        super._render()
     }
 
     makeKeyAndVisible() {
@@ -51,14 +57,32 @@ if (typeof window != 'undefined') {
     const rooWindow = new Window()
     window.rootWindow = rooWindow
 
+    // handle retina display
+    function backingScale() {
+        if ('devicePixelRatio' in window) {
+            if (window.devicePixelRatio > 1) {
+                return window.devicePixelRatio;
+            }
+        }
+        return 1;
+    }
+
+
     function resizeCanvas() {
 		const w = document.body.offsetWidth,
 		      h = document.body.offsetHeight;
         const canvas = document.getElementById("canvas");
-        const ctx =  canvas.getContext("2d");
-		ctx.canvas.width  = w;
-		ctx.canvas.height = h;
+        const scale = backingScale()
+        const canvasWidth = w * scale
+        const canvasHeight = h * scale
+		canvas.width  = canvasWidth
+		canvas.height = canvasHeight
+        canvas.style.width = w + "px"
+        canvas.style.height = h + "px"
         canvas.style.background = "#777099"
+
+        const ctx =  canvas.getContext("2d");
+        ctx.scale(scale, scale)
         rootWindow.size = new Size(w,h)
 	}
     resizeCanvas()

@@ -15,6 +15,9 @@ export class Point {
     copy() {
         return new Point(this.x, this.y)
     }
+    static PointZero() {
+        return new Point()
+    }
 }
 
 export class Size {

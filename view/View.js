@@ -3,6 +3,7 @@ import BaseObject from './BaseObject'
 import {nil, copy} from '../util/Util.js'
 import {drawloop} from './Drawloop'
 import {Point, Size, Edge, ViewAutoresizing} from './Geometry'
+import CGContext from './CGContext'
 
 export default class View extends BaseObject {
     constructor(x=0, y=0, width=0, height=0) {
@@ -10,6 +11,7 @@ export default class View extends BaseObject {
         this._backgroundColor = "#00a488"
         this._position = new Point(x, y)
         this._size = new Size(width, height)
+        this._alpha = 1
         this.subviews = new Array()
         this.autoresizingMask = ViewAutoresizing.None
         this.superview = nil
@@ -22,6 +24,16 @@ export default class View extends BaseObject {
     set backgroundColor(newValue){
         if (this._backgroundColor != newValue) {
             this._backgroundColor = newValue
+            this._checkAndSetNeedsRender()
+        }
+    }
+
+    get alpha() {
+        return this._alpha;
+    }
+    set alpha(newValue){
+        if (this._alpha != newValue) {
+            this._alpha = newValue
             this._checkAndSetNeedsRender()
         }
     }
@@ -131,10 +143,10 @@ export default class View extends BaseObject {
     addSubview(view) {
         view.willMoveToSuperview(this)
         view.willMoveToWindow(this.window)
+        view.window = this.window
 
         this.subviews.push(view)
         view.superview = this
-        view.window = this.window
 
         view.didMoveToSuperview()
         view.didMoveToWindow()
@@ -172,6 +184,7 @@ export default class View extends BaseObject {
                 setWindow(subview)
             }
         }
+        setWindow(this)
         if (newWindow) {
             this._layoutSubviews(this.size)
         }
@@ -207,9 +220,9 @@ export default class View extends BaseObject {
             return point
         } else if (this.isDescendantOfView(view)) {
             let next = this
-            let convertPoint = point
+            let convertPoint = point.copy()
             while (next !== view && next !== nil) {
-                convertPoint = {x:convertPoint.x + next.position.x, y:convertPoint.y + next.position.y}
+                convertPoint = new Point(convertPoint.x + next.position.x, convertPoint.y + next.position.y)
                 next = next.superview
             }
             return convertPoint
@@ -221,7 +234,7 @@ export default class View extends BaseObject {
                 next = next.superview
             }
             for (let value of array.reverse()) {
-                convertPoint = {x:convertPoint.x - value.position.x, y:convertPoint.y - value.position.y}
+                convertPoint = new Point(convertPoint.x - value.position.x, convertPoint.y - value.position.y)
             }
             return convertPoint
         } else if (this.window !== view.window) {
@@ -242,17 +255,19 @@ export default class View extends BaseObject {
 
     _render() {
         console.log(`render:${this.toString()}`)
-        this.render()
+        const ctx = new CGContext(this)
+        ctx.save()
+        this.render(ctx)
         for (let view of this.subviews) {
             view._render()
         }
+        ctx.restore()
     }
 
-    render() {
-        const ctx = this.getContext();
+    render(ctx) {
+        ctx.alpha = ctx.alpha * this.alpha
         ctx.fillStyle = this.backgroundColor;
-        const position = this.convertPointToView({x:0, y:0}, this.window)
-        ctx.fillRect(position.x, position.y, this.size.width, this.size.height);
+        ctx.fillRect(0, 0, this.size.width, this.size.height);
     }
 
     toString() {
