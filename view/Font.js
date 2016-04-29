@@ -7,11 +7,11 @@ this.fontSize = "24px";
 this.fontFamily = "Verdana";
 */
 
-class Font {
+export default class Font {
     constructor() {
         this.fontStyle = "";
         this.fontWeight = "";
-        this.fontSize = "24px";
+        this.fontSize = "18px";
         this.fontFamily = "Helvetica";
         var b = " ";
     }

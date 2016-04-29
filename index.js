@@ -5,6 +5,7 @@ import Window from './view/Window.js';
 var server = express()
 
 server.use('/dist', express.static('dist'));
+server.use('/static', express.static('static'));
 
 server.get('/', function(req, res) {
   res.send(Window.renderHtml())

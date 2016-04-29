@@ -64,21 +64,19 @@ export default class CGContext {
         this.context.fillRect(x, y, width, height);
     }
 
-
-
     wrapText(text, px, py, maxWidth, lineHeight=26) {
         let [x, y] = this.convertPoint(new Point(px, py))
 
-        var words = text.split(' ');
+        var words = text.split('');
         var line = '';
 
         for(var n = 0; n < words.length; n++) {
-            var testLine = line + words[n] + ' ';
-            var metrics = context.measureText(testLine);
+            var testLine = line + words[n] + '';
+            var metrics = this.context.measureText(testLine);
             var testWidth = metrics.width;
             if (testWidth > maxWidth && n > 0) {
                 this.context.fillText(line, x, y);
-                line = words[n] + ' ';
+                line = words[n] + '';
                 y += lineHeight;
             } else {
                 line = testLine;
@@ -92,4 +90,13 @@ export default class CGContext {
         this.context.fillText(text, x, y, maxWidth);
     }
 
+    drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight) {
+        const context = this.context
+        if (image.complete) {
+            const [x, y] = this.convertPoint(new Point(dx, dy))
+            context.drawImage(image, sx, sy, sWidth, sHeight, x, y, dWidth, dHeight)
+        } else {
+            // image not load
+        }
+    }
 }

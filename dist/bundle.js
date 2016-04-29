@@ -31,7 +31,7 @@ var _RootView2 = _interopRequireDefault(_RootView);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"./main/RootView":2,"./util/Array":3,"./util/Util":4,"./view/BaseObject":5,"./view/Geometry":8,"./view/Label":9,"./view/View":10,"./view/Window":11}],2:[function(require,module,exports){
+},{"./main/RootView":2,"./util/Array":3,"./util/Util":4,"./view/BaseObject":5,"./view/Geometry":9,"./view/Label":11,"./view/View":12,"./view/Window":13}],2:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -47,6 +47,10 @@ var _Geometry = require('../view/Geometry');
 var _Label = require('../view/Label');
 
 var _Label2 = _interopRequireDefault(_Label);
+
+var _ImageView = require('../view/ImageView');
+
+var _ImageView2 = _interopRequireDefault(_ImageView);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -71,9 +75,27 @@ var RootView = function (_View) {
 
         var label = new _Label2.default(0, 20, 400, 30);
         _this.backgroundColor = "white";
-        label.text = "canvalotion is here";
+        label.text = "Multimodal Learning用于面部表情识别，多模态分别表现为图像数据和标记点数据，使用Multimodal Learning对二者融合的意义在于更全面地表现表情信息以及区分不同模态的数据对表情识别的影响。";
         _this.addSubview(label);
+        label.isMultiLine = true;
 
+        var image = new Image();
+        image.src = "./static/test.png";
+        var imageView = new _ImageView2.default(image);
+        imageView.position = new _Geometry.Point(60, 200);
+        imageView.size = new _Geometry.Size(100, 100);
+        imageView.equalRatio = _ImageView.EqualRatio.FlexibleHeight;
+        imageView.backgroundColor = "#8800AA";
+        _this.addSubview(imageView);
+
+        imageView.addSubview(label);
+
+        var imageView2 = new _ImageView2.default(image);
+        imageView2.position = new _Geometry.Point(60, 400);
+        imageView2.size = new _Geometry.Size(100, 100);
+        imageView2.equalRatio = _ImageView.EqualRatio.FlexibleWidth;
+        imageView2.backgroundColor = "#8800AA";
+        _this.addSubview(imageView2);
         return _this;
     }
 
@@ -82,7 +104,7 @@ var RootView = function (_View) {
 
 exports.default = RootView;
 
-},{"../view/Geometry":8,"../view/Label":9,"../view/View":10}],3:[function(require,module,exports){
+},{"../view/Geometry":9,"../view/ImageView":10,"../view/Label":11,"../view/View":12}],3:[function(require,module,exports){
 "use strict";
 
 Array.prototype.indexOfOld = Array.prototype.indexOf;
@@ -241,16 +263,16 @@ var CGContext = function () {
             var y = _convertPoint4[1];
 
 
-            var words = text.split(' ');
+            var words = text.split('');
             var line = '';
 
             for (var n = 0; n < words.length; n++) {
-                var testLine = line + words[n] + ' ';
-                var metrics = context.measureText(testLine);
+                var testLine = line + words[n] + '';
+                var metrics = this.context.measureText(testLine);
                 var testWidth = metrics.width;
                 if (testWidth > maxWidth && n > 0) {
                     this.context.fillText(line, x, y);
-                    line = words[n] + ' ';
+                    line = words[n] + '';
                     y += lineHeight;
                 } else {
                     line = testLine;
@@ -271,6 +293,23 @@ var CGContext = function () {
             var y = _convertPoint6[1];
 
             this.context.fillText(text, x, y, maxWidth);
+        }
+    }, {
+        key: 'drawImage',
+        value: function drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight) {
+            var context = this.context;
+            if (image.complete) {
+                var _convertPoint7 = this.convertPoint(new _Geometry.Point(dx, dy));
+
+                var _convertPoint8 = _slicedToArray(_convertPoint7, 2);
+
+                var x = _convertPoint8[0];
+                var y = _convertPoint8[1];
+
+                context.drawImage(image, sx, sy, sWidth, sHeight, x, y, dWidth, dHeight);
+            } else {
+                // image not load
+            }
         }
     }, {
         key: 'context',
@@ -322,7 +361,7 @@ var CGContext = function () {
 
 exports.default = CGContext;
 
-},{"../util/Util.js":4,"./Geometry":8}],7:[function(require,module,exports){
+},{"../util/Util.js":4,"./Geometry":9}],7:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -369,6 +408,57 @@ var Drawloop = function () {
 var drawloop = exports.drawloop = new Drawloop();
 
 },{"../util/Util.js":4}],8:[function(require,module,exports){
+"use strict";
+
+/*
+this.fontStyle = "italic";
+this.fontWeight = "bold";
+this.fontSize = "24px";
+this.fontFamily = "Verdana";
+*/
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Font = function () {
+    function Font() {
+        _classCallCheck(this, Font);
+
+        this.fontStyle = "";
+        this.fontWeight = "";
+        this.fontSize = "18px";
+        this.fontFamily = "Helvetica";
+        var b = " ";
+    }
+
+    _createClass(Font, [{
+        key: "getFontText",
+        value: function getFontText() {
+            return this.fontStyle + " " + this.fontWeight + " " + this.fontSize + " " + this.fontFamily;
+        }
+    }, {
+        key: "copy",
+        value: function copy() {
+            var font = new Font();
+            font.fontStyle = this.fontStyle;
+            font.fontWeight = this.fontWeight;
+            font.fontSize = this.fontSize;
+            font.fontFamily = this.fontFamily;
+            return font;
+        }
+    }]);
+
+    return Font;
+}();
+
+exports.default = Font;
+
+},{}],9:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -486,7 +576,146 @@ var ViewAutoresizing = exports.ViewAutoresizing = {
     FlexibleBottomMargin: 1 << 5
 };
 
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.EqualRatio = undefined;
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
+var _View2 = require('./View');
+
+var _View3 = _interopRequireDefault(_View2);
+
+var _Geometry = require('./Geometry');
+
+var _CGContext = require('./CGContext');
+
+var _CGContext2 = _interopRequireDefault(_CGContext);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var EqualRatio = exports.EqualRatio = {
+    None: 0,
+    FlexibleHeight: 1,
+    FlexibleWidth: 2
+};
+
+var ImageView = function (_View) {
+    _inherits(ImageView, _View);
+
+    function ImageView() {
+        var image = arguments.length <= 0 || arguments[0] === undefined ? nil : arguments[0];
+
+        _classCallCheck(this, ImageView);
+
+        var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(ImageView).call(this));
+
+        _this.image = image;
+        _this._autoSizing = false;
+        _this._equalRatio = EqualRatio.None;
+        return _this;
+    }
+
+    _createClass(ImageView, [{
+        key: 'fitSize',
+        value: function fitSize() {
+            if (this.image.complete) {
+                return new _Geometry.Size(this.image.width, this.image.height);
+            } else {
+                return this.size;
+            }
+        }
+    }, {
+        key: '_renderWithImage',
+        value: function _renderWithImage(image) {
+            if (this.autoSizing) {
+                this.size = new _Geometry.Size(this._image.width, this._image.height);
+            } else if (this.equalRatio == EqualRatio.FlexibleHeight) {
+                var imageRatio = image.height / image.width;
+                this.size = new _Geometry.Size(this.size.width, imageRatio * this.size.width);
+            } else if (this.equalRatio == EqualRatio.FlexibleWidth) {
+                var _imageRatio = image.width / image.height;
+                this.size = new _Geometry.Size(_imageRatio * this.size.height, this.size.height);
+            }
+            this._checkAndSetNeedsRender();
+        }
+    }, {
+        key: 'render',
+        value: function render(ctx) {
+            _get(Object.getPrototypeOf(ImageView.prototype), 'render', this).call(this, ctx);
+            ctx.drawImage(this.image, 0, 0, this.image.width, this.image.height, 0, 0, this.size.width, this.size.height);
+        }
+    }, {
+        key: 'autoSizing',
+        get: function get() {
+            return this._autoSizing;
+        },
+        set: function set(newValue) {
+            if (this._autoSizing != newValue) {
+                this._autoSizing = newValue;
+                this._checkAndSetNeedsRender();
+            }
+        }
+    }, {
+        key: 'equalRatio',
+        get: function get() {
+            return this._equalRatio;
+        },
+        set: function set(newValue) {
+            if (this._equalRatio != newValue) {
+                this._equalRatio = newValue;
+                this._checkAndSetNeedsRender();
+            }
+        }
+    }, {
+        key: 'image',
+        get: function get() {
+            return this._image;
+        },
+        set: function set(newValue) {
+            var _this2 = this;
+
+            if (this._image != newValue) {
+                if (this._image) {
+                    this._image.removeEventListener('load', this._imageOnload);
+                }
+                this._image = newValue;
+                if (this._image) {
+                    if (this._image.complete) {
+                        this._renderWithImage(this._image);
+                    } else {
+                        if (!this._imageOnload) {
+                            this._imageOnload = function () {
+                                _this2._renderWithImage(_this2._image);
+                            };
+                        }
+                        this._image.addEventListener('load', this._imageOnload);
+                    }
+                } else {
+                    this._checkAndSetNeedsRender();
+                }
+            }
+        }
+    }]);
+
+    return ImageView;
+}(_View3.default);
+
+exports.default = ImageView;
+
+},{"./CGContext":6,"./Geometry":9,"./View":12}],11:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -504,6 +733,10 @@ var _View2 = require('./View');
 var _View3 = _interopRequireDefault(_View2);
 
 var _Geometry = require('./Geometry');
+
+var _Font = require('./Font');
+
+var _Font2 = _interopRequireDefault(_Font);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -527,9 +760,9 @@ var Label = function (_View) {
         var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Label).call(this, x, y, width, height));
 
         _this._multiLine = false;
-        _this.text = _Util.nil;
+        _this._font = new _Font2.default();
+        _this._text = _Util.nil;
         _this._textColor = "black";
-
         return _this;
     }
 
@@ -539,20 +772,30 @@ var Label = function (_View) {
             _get(Object.getPrototypeOf(Label.prototype), 'render', this).call(this, ctx);
             var drawingText = this.text == _Util.nil ? "" : this.text;
             ctx.fillStyle = this.textColor;
+            ctx.font = this.font;
             ctx.textBaseline = "top";
             if (this.isMultiLine) {
-                ctx.wrapText(drawingText, 0, 0, this.size.width);
+                ctx.wrapText(drawingText, 0, 0, this.size.width, parseInt(this.font.fontSize));
             } else {
                 ctx.fillText(drawingText, 0, 0, this.size.width);
+            }
+        }
+    }, {
+        key: 'text',
+        get: function get() {
+            return this._text;
+        },
+        set: function set(newValue) {
+            if (this._text != newValue) {
+                this._text = newValue;
+                this._checkAndSetNeedsRender();
             }
         }
     }, {
         key: 'isMultiLine',
         get: function get() {
             return this._multiLine;
-        }
-    }, {
-        key: 'setMultiLine',
+        },
         set: function set(newValue) {
             if (this._multiLine != newValue) {
                 this._multiLine = newValue;
@@ -572,6 +815,17 @@ var Label = function (_View) {
                 this._checkAndSetNeedsRender();
             }
         }
+    }, {
+        key: 'font',
+        get: function get() {
+            return this._font;
+        },
+        set: function set(newValue) {
+            if (this._font != newValue) {
+                this._font = newValue;
+                this._checkAndSetNeedsRender();
+            }
+        }
     }]);
 
     return Label;
@@ -579,7 +833,7 @@ var Label = function (_View) {
 
 exports.default = Label;
 
-},{"../util/Util":4,"./Geometry":8,"./View":10}],10:[function(require,module,exports){
+},{"../util/Util":4,"./Font":8,"./Geometry":9,"./View":12}],12:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -731,6 +985,19 @@ var View = function (_BaseObject) {
     }, {
         key: 'layoutSubviews',
         value: function layoutSubviews() {}
+    }, {
+        key: 'sizeToFit',
+        value: function sizeToFit() {
+            var value = this.fitSize();
+            if (_Geometry.Size.prototype.isPrototypeOf(value)) {
+                this.size = value;
+            }
+        }
+    }, {
+        key: 'fitSize',
+        value: function fitSize() {
+            return this.size;
+        }
     }, {
         key: 'getContext',
         value: function getContext() {
@@ -995,6 +1262,42 @@ var View = function (_BaseObject) {
                 this._checkAndSetNeedsRender();
             }
         }
+    }, {
+        key: 'x',
+        get: function get() {
+            return this.position.x;
+        },
+        set: function set(newValue) {
+            var newPoint = new _Geometry.Point(newValue, this.position.y);
+            this.position = newPoint;
+        }
+    }, {
+        key: 'y',
+        get: function get() {
+            return this.position.y;
+        },
+        set: function set(newValue) {
+            var newPoint = new _Geometry.Point(this.position.x, newValue);
+            this.position = newPoint;
+        }
+    }, {
+        key: 'width',
+        get: function get() {
+            return this.size.width;
+        },
+        set: function set(newValue) {
+            var newSize = new _Geometry.Size(width, this.size.height);
+            this.size = newSize;
+        }
+    }, {
+        key: 'height',
+        get: function get() {
+            return this.size.height;
+        },
+        set: function set(newValue) {
+            var newSize = new _Geometry.Size(height, this.size.width);
+            this.size = newSize;
+        }
     }]);
 
     return View;
@@ -1002,7 +1305,7 @@ var View = function (_BaseObject) {
 
 exports.default = View;
 
-},{"../util/Util.js":4,"./BaseObject":5,"./CGContext":6,"./Drawloop":7,"./Geometry":8}],11:[function(require,module,exports){
+},{"../util/Util.js":4,"./BaseObject":5,"./CGContext":6,"./Drawloop":7,"./Geometry":9}],13:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1132,4 +1435,4 @@ if (typeof window != 'undefined') {
     })();
 }
 
-},{"../main/RootView":2,"../util/Util":4,"./Drawloop":7,"./Geometry":8,"./View":10}]},{},[1]);
+},{"../main/RootView":2,"../util/Util":4,"./Drawloop":7,"./Geometry":9,"./View":12}]},{},[1]);

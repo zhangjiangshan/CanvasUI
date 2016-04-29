@@ -62,6 +62,38 @@ export default class View extends BaseObject {
         }
     }
 
+    get x() {
+        return this.position.x
+    }
+    set x(newValue) {
+        const newPoint = new Point(newValue, this.position.y)
+        this.position = newPoint
+    }
+
+    get y() {
+        return this.position.y
+    }
+    set y(newValue) {
+        const newPoint = new Point(this.position.x, newValue)
+        this.position = newPoint
+    }
+
+    get width() {
+        return this.size.width;
+    }
+    set width(newValue) {
+        const newSize = new Size(width, this.size.height)
+        this.size = newSize
+    }
+
+    get height() {
+        return this.size.height;
+    }
+    set height(newValue) {
+        const newSize = new Size(height, this.size.width)
+        this.size = newSize
+    }
+
     _layoutSubviews(oldSize=this.size) {
         for (let view of this.subviews) {
             view._configAutoResizing(oldSize)
@@ -133,6 +165,17 @@ export default class View extends BaseObject {
 
     layoutSubviews() {
 
+    }
+
+    sizeToFit() {
+        const value = this.fitSize()
+        if (Size.prototype.isPrototypeOf(value)) {
+            this.size = value
+        }
+    }
+
+    fitSize() {
+        return this.size
     }
 
     getContext() {

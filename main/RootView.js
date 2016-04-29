@@ -2,6 +2,7 @@
 import View from '../view/View'
 import {Point, Size, Edge, ViewAutoresizing} from '../view/Geometry'
 import Label from '../view/Label'
+import ImageView, {EqualRatio} from '../view/ImageView'
 
 export default class RootView extends View {
     constructor() {
@@ -13,8 +14,26 @@ export default class RootView extends View {
 
         const label = new Label(0, 20, 400, 30)
         this.backgroundColor  = "white"
-        label.text = "canvalotion is here"
+        label.text = "Multimodal Learning用于面部表情识别，多模态分别表现为图像数据和标记点数据，使用Multimodal Learning对二者融合的意义在于更全面地表现表情信息以及区分不同模态的数据对表情识别的影响。"
         this.addSubview(label)
+        label.isMultiLine = true
 
+        const image = new Image()
+        image.src = "./static/test.png"
+        const imageView = new ImageView(image)
+        imageView.position = new Point(60, 200)
+        imageView.size = new Size(100, 100)
+        imageView.equalRatio = EqualRatio.FlexibleHeight
+        imageView.backgroundColor = "#8800AA"
+        this.addSubview(imageView)
+
+        imageView.addSubview(label)
+
+        const imageView2 = new ImageView(image)
+        imageView2.position = new Point(60, 400)
+        imageView2.size = new Size(100, 100)
+        imageView2.equalRatio = EqualRatio.FlexibleWidth
+        imageView2.backgroundColor = "#8800AA"
+        this.addSubview(imageView2)
     }
 }
