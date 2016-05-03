@@ -5,7 +5,7 @@ export default class BaseObject {
 
     }
 
-    
+
 
     // static init() {
     //     const result = new this()
@@ -27,7 +27,7 @@ export default class BaseObject {
     // }
 
     className() {
-        return self.constructor.name
+        return this.constructor.name
     }
 
 }

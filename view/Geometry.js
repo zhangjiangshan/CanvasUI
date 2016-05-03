@@ -54,6 +54,31 @@ export class Edge {
     }
 }
 
+export class Frame {
+    constructor(x=0, y=0, width=0, height=0) {
+        this.origin = new Point(x, y)
+        this.size = new Size(width, height)
+    }
+    valueOf() {
+        return JSON.stringify(this)
+    }
+    round() {
+        return new Frame(Math.round(this.origin.x),
+                        Math.round(this.origin.y),
+                        Math.round(this.size.width),
+                        Math.round(this.size.height))
+    }
+    copy() {
+        return new Frame(this.origin.x, this.origin.y, this.size.width, this.size.height)
+    }
+}
+
+export function isPointIn(point, position, size) {
+    const xIn = ((point.x >= position.x) && (point.x <= position.x + size.width))
+    const yIn = ((point.y >= position.y) && (point.y <= position.y + size.height))
+    return (xIn && yIn)
+}
+
 export const ViewAutoresizing = {
     None:                  0,
     FlexibleLeftMargin:    1 << 0,

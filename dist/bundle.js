@@ -188,7 +188,7 @@ var BaseObject = function () {
     _createClass(BaseObject, [{
         key: "className",
         value: function className() {
-            return self.constructor.name;
+            return this.constructor.name;
         }
     }]);
 
@@ -467,6 +467,8 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+exports.isPointIn = isPointIn;
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Point = exports.Point = function () {
@@ -565,6 +567,45 @@ var Edge = exports.Edge = function () {
 
     return Edge;
 }();
+
+var Frame = exports.Frame = function () {
+    function Frame() {
+        var x = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+        var y = arguments.length <= 1 || arguments[1] === undefined ? 0 : arguments[1];
+        var width = arguments.length <= 2 || arguments[2] === undefined ? 0 : arguments[2];
+        var height = arguments.length <= 3 || arguments[3] === undefined ? 0 : arguments[3];
+
+        _classCallCheck(this, Frame);
+
+        this.origin = new Point(x, y);
+        this.size = new Size(width, height);
+    }
+
+    _createClass(Frame, [{
+        key: "valueOf",
+        value: function valueOf() {
+            return JSON.stringify(this);
+        }
+    }, {
+        key: "round",
+        value: function round() {
+            return new Frame(Math.round(this.origin.x), Math.round(this.origin.y), Math.round(this.size.width), Math.round(this.size.height));
+        }
+    }, {
+        key: "copy",
+        value: function copy() {
+            return new Frame(this.origin.x, this.origin.y, this.size.width, this.size.height);
+        }
+    }]);
+
+    return Frame;
+}();
+
+function isPointIn(point, position, size) {
+    var xIn = point.x >= position.x && point.x <= position.x + size.width;
+    var yIn = point.y >= position.y && point.y <= position.y + size.height;
+    return xIn && yIn;
+}
 
 var ViewAutoresizing = exports.ViewAutoresizing = {
     None: 0,
@@ -885,6 +926,7 @@ var View = function (_BaseObject) {
         _this.autoresizingMask = _Geometry.ViewAutoresizing.None;
         _this.superview = _Util.nil;
         _this.window = _Util.nil;
+        _this.userInteractionEnabled = true;
         return _this;
     }
 
@@ -1112,12 +1154,12 @@ var View = function (_BaseObject) {
                 return point;
             } else if (this.isDescendantOfView(view)) {
                 var next = this;
-                var _convertPoint = point.copy();
+                var convertPoint = point.copy();
                 while (next !== view && next !== _Util.nil) {
-                    _convertPoint = new _Geometry.Point(_convertPoint.x + next.position.x, _convertPoint.y + next.position.y);
+                    convertPoint = new _Geometry.Point(convertPoint.x + next.position.x, convertPoint.y + next.position.y);
                     next = next.superview;
                 }
-                return _convertPoint;
+                return convertPoint;
             } else if (this.isAcendantOfView(view)) {
                 var array = new Array();
                 var _next = view;
@@ -1125,6 +1167,7 @@ var View = function (_BaseObject) {
                     array.push(_next);
                     _next = _next.superview;
                 }
+                var _convertPoint = point.copy();
                 var _iteratorNormalCompletion3 = true;
                 var _didIteratorError3 = false;
                 var _iteratorError3 = undefined;
@@ -1133,7 +1176,7 @@ var View = function (_BaseObject) {
                     for (var _iterator3 = array.reverse()[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
                         var value = _step3.value;
 
-                        convertPoint = new _Geometry.Point(convertPoint.x - value.position.x, convertPoint.y - value.position.y);
+                        _convertPoint = new _Geometry.Point(_convertPoint.x - value.position.x, _convertPoint.y - value.position.y);
                     }
                 } catch (err) {
                     _didIteratorError3 = true;
@@ -1150,7 +1193,7 @@ var View = function (_BaseObject) {
                     }
                 }
 
-                return convertPoint;
+                return _convertPoint;
             } else if (this.window !== view.window) {
                 console.log(this.toString() + ' and ' + this.toString() + ' are not on same window');
                 return _Util.nil;
@@ -1213,6 +1256,75 @@ var View = function (_BaseObject) {
         key: 'toString',
         value: function toString() {
             return this.className() + ':{position:(' + this.position.x + ',' + this.position.y + '), size:(' + this.size.width + ',' + this.size.height + ')}';
+        }
+
+        // touch
+
+    }, {
+        key: 'hitTest',
+        value: function hitTest(point) {
+            var finalView = _Util.nil;
+            var _iteratorNormalCompletion5 = true;
+            var _didIteratorError5 = false;
+            var _iteratorError5 = undefined;
+
+            try {
+                for (var _iterator5 = this.subviews.reverse()[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+                    var subview = _step5.value;
+
+                    if (subview.pointInside(point)) {
+                        var view = subview.hitTest(this.convertPointToView(point, subview));
+                        if (view.userInteractionEnabled == true) {
+                            finalView = view;
+                            break;
+                        }
+                    }
+                }
+            } catch (err) {
+                _didIteratorError5 = true;
+                _iteratorError5 = err;
+            } finally {
+                try {
+                    if (!_iteratorNormalCompletion5 && _iterator5.return) {
+                        _iterator5.return();
+                    }
+                } finally {
+                    if (_didIteratorError5) {
+                        throw _iteratorError5;
+                    }
+                }
+            }
+
+            if (finalView) {
+                return finalView;
+            } else {
+                return this;
+            }
+        }
+    }, {
+        key: 'pointInside',
+        value: function pointInside(point) {
+            return (0, _Geometry.isPointIn)(point, this.position, this.size);
+        }
+    }, {
+        key: 'mouseDown',
+        value: function mouseDown(p) {
+            console.log('I\'m down ' + this.toString());
+        }
+    }, {
+        key: 'mouseMove',
+        value: function mouseMove(p) {
+            console.log('I\'m move ' + this.toString());
+        }
+    }, {
+        key: 'mouseUp',
+        value: function mouseUp(p) {
+            console.log('I\'m up ' + this.toString());
+        }
+    }, {
+        key: 'mouseCancel',
+        value: function mouseCancel(p) {
+            console.log('I\'m cancel ' + this.toString());
         }
     }, {
         key: 'backgroundColor',
@@ -1354,6 +1466,7 @@ var Window = function (_View) {
         _this.window = _this;
         _this.backgroundColor = "#00a488";
         _this.rootView = _Util.nil;
+        _this.firstResponser = _this;
         return _this;
     }
 
@@ -1380,6 +1493,32 @@ var Window = function (_View) {
         key: '_layoutSubviews',
         value: function _layoutSubviews(oldSize) {
             _get(Object.getPrototypeOf(Window.prototype), '_layoutSubviews', this).call(this, oldSize);
+        }
+    }, {
+        key: 'receiveMouseDown',
+        value: function receiveMouseDown(point) {
+            var p = new _Geometry.Point(point[0], point[1]);
+            var responser = this.hitTest(p);
+            this.firstResponser = responser;
+            this.firstResponser.mouseDown(this.convertPointToView(p, this.firstResponser));
+        }
+    }, {
+        key: 'receiveMouseMove',
+        value: function receiveMouseMove(point) {
+            var p = new _Geometry.Point(point[0], point[1]);
+            //this.firstResponser.mouseMove(this.convertPointToView(p, this.firstResponser))
+        }
+    }, {
+        key: 'receiveMouseUp',
+        value: function receiveMouseUp(point) {
+            var p = new _Geometry.Point(point[0], point[1]);
+            var responser = this.hitTest(p);
+            if (this.firstResponser === responser) {
+                this.firstResponser.mouseUp(this.convertPointToView(p, this.firstResponser));
+            } else {
+                this.firstResponser.mouseCancel(this.convertPointToView(p, this.firstResponser));
+            }
+            this.firstResponser = this;
         }
     }], [{
         key: 'renderHtml',
@@ -1426,10 +1565,48 @@ if (typeof window != 'undefined') {
             rootWindow.size = new _Geometry.Size(w, h);
         };
 
+        var addTouchListener = function addTouchListener() {
+            var canvas = document.getElementById("canvas");
+            canvas.addEventListener("mousedown", mouseDown, false);
+            canvas.addEventListener("mousemove", mouseMove, false);
+            canvas.addEventListener("mouseup", mouseUp, false);
+            // canvas.addEventListener("touchstart", touchDown, false);
+            // canvas.addEventListener("touchend", touchUp, false);
+            // canvas.addEventListener("touchmove", touchMove, false);
+            // canvas.addEventListener("touchcancel", touchcancel, false);
+        };
+
+        var convertTouchPoint = function convertTouchPoint(e) {
+            if (!e) {
+                var _e = event;
+            }
+            var canvas = document.getElementById("canvas");
+            var canX = e.pageX - canvas.offsetLeft;
+            var canY = e.pageY - canvas.offsetTop;
+            return [canX, canY];
+        };
+
+        var mouseDown = function mouseDown(e) {
+            var point = convertTouchPoint(e);
+            rootWindow.receiveMouseDown(point);
+        };
+
+        var mouseMove = function mouseMove(e) {
+            var point = convertTouchPoint(e);
+            rootWindow.receiveMouseMove(point);
+        };
+
+        var mouseUp = function mouseUp(e) {
+            var point = convertTouchPoint(e);
+            rootWindow.receiveMouseUp(point);
+        };
+
         console.log("Hell");
         var rooWindow = new Window();
         window.rootWindow = rooWindow;
+
         resizeCanvas();
+        addTouchListener();
         window.addEventListener('resize', resizeCanvas, false);
         rooWindow.makeKeyAndVisible();
     })();

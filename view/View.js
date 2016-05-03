@@ -2,7 +2,7 @@
 import BaseObject from './BaseObject'
 import {nil, copy} from '../util/Util.js'
 import {drawloop} from './Drawloop'
-import {Point, Size, Edge, ViewAutoresizing} from './Geometry'
+import {Point, Size, Edge, ViewAutoresizing, isPointIn} from './Geometry'
 import CGContext from './CGContext'
 
 export default class View extends BaseObject {
@@ -16,6 +16,7 @@ export default class View extends BaseObject {
         this.autoresizingMask = ViewAutoresizing.None
         this.superview = nil
         this.window = nil
+        this.userInteractionEnabled = true
     }
 
     get backgroundColor() {
@@ -276,6 +277,7 @@ export default class View extends BaseObject {
                 array.push(next)
                 next = next.superview
             }
+            let convertPoint = point.copy()
             for (let value of array.reverse()) {
                 convertPoint = new Point(convertPoint.x - value.position.x, convertPoint.y - value.position.y)
             }
@@ -316,4 +318,44 @@ export default class View extends BaseObject {
     toString() {
         return `${this.className()}:{position:(${this.position.x},${this.position.y}), size:(${this.size.width},${this.size.height})}`
     }
+
+    // touch
+    hitTest(point) {
+        let finalView = nil
+        for (let subview of this.subviews.reverse()) {
+            if (subview.pointInside(point)) {
+                const view = subview.hitTest(this.convertPointToView(point, subview))
+                if (view.userInteractionEnabled == true) {
+                    finalView = view
+                    break
+                }
+            }
+        }
+        if (finalView) {
+            return finalView
+        } else {
+            return this
+        }
+    }
+
+    pointInside(point) {
+        return isPointIn(point, this.position, this.size)
+    }
+
+    mouseDown(p) {
+        console.log(`I'm down ${this.toString()}`)
+    }
+
+    mouseMove(p) {
+        console.log(`I'm move ${this.toString()}`)
+    }
+
+    mouseUp(p) {
+        console.log(`I'm up ${this.toString()}`)
+    }
+
+    mouseCancel(p) {
+        console.log(`I'm cancel ${this.toString()}`)
+    }
+
 }

@@ -11,6 +11,7 @@ export default class Window extends View {
         this.window = this
         this.backgroundColor = "#00a488"
         this.rootView = nil
+        this.firstResponser = this
     }
 
     render(context) {
@@ -33,6 +34,29 @@ export default class Window extends View {
 
     _layoutSubviews(oldSize) {
         super._layoutSubviews(oldSize)
+    }
+
+    receiveMouseDown(point) {
+        const p = new Point(point[0], point[1])
+        const responser = this.hitTest(p)
+        this.firstResponser = responser
+        this.firstResponser.mouseDown(this.convertPointToView(p, this.firstResponser))
+    }
+
+    receiveMouseMove(point) {
+        const p = new Point(point[0], point[1])
+        //this.firstResponser.mouseMove(this.convertPointToView(p, this.firstResponser))
+    }
+
+    receiveMouseUp(point) {
+        const p = new Point(point[0], point[1])
+        const responser = this.hitTest(p)
+        if (this.firstResponser === responser) {
+            this.firstResponser.mouseUp(this.convertPointToView(p, this.firstResponser))
+        } else {
+            this.firstResponser.mouseCancel(this.convertPointToView(p, this.firstResponser))
+        }
+        this.firstResponser = this
     }
 
     static renderHtml() {
@@ -71,7 +95,7 @@ if (typeof window != 'undefined') {
     function resizeCanvas() {
 		const w = document.body.offsetWidth,
 		      h = document.body.offsetHeight;
-        const canvas = document.getElementById("canvas");
+        const canvas = document.getElementById("canvas")
         const scale = backingScale()
         const canvasWidth = w * scale
         const canvasHeight = h * scale
@@ -85,7 +109,46 @@ if (typeof window != 'undefined') {
         ctx.scale(scale, scale)
         rootWindow.size = new Size(w,h)
 	}
+
+    function addTouchListener() {
+        const canvas = document.getElementById("canvas")
+        canvas.addEventListener("mousedown", mouseDown, false);
+        canvas.addEventListener("mousemove", mouseMove, false);
+        canvas.addEventListener("mouseup", mouseUp, false);
+        // canvas.addEventListener("touchstart", touchDown, false);
+        // canvas.addEventListener("touchend", touchUp, false);
+        // canvas.addEventListener("touchmove", touchMove, false);
+        // canvas.addEventListener("touchcancel", touchcancel, false);
+    }
+
+    function convertTouchPoint(e) {
+        if (!e) {
+            let e = event
+        }
+        const canvas = document.getElementById("canvas")
+        const canX = e.pageX - canvas.offsetLeft
+        const canY = e.pageY - canvas.offsetTop
+        return [canX, canY]
+    }
+
+    function mouseDown(e) {
+        const point = convertTouchPoint(e)
+        rootWindow.receiveMouseDown(point)
+    }
+
+    function mouseMove(e) {
+        const point = convertTouchPoint(e)
+        rootWindow.receiveMouseMove(point)
+    }
+
+    function mouseUp(e) {
+        const point = convertTouchPoint(e)
+        rootWindow.receiveMouseUp(point)
+    }
+
+
     resizeCanvas()
+    addTouchListener()
     window.addEventListener('resize', resizeCanvas, false);
     rooWindow.makeKeyAndVisible()
 }
