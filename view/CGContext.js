@@ -99,4 +99,10 @@ export default class CGContext {
             // image not load
         }
     }
+
+    clip(rect, rule="nonzero") {
+        const [x, y] = this.convertPoint(rect.position)
+        this.context.rect(x, y, rect.size.width, rect.size.height)
+        this.context.clip(rule)
+    }
 }

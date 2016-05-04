@@ -59,6 +59,10 @@ export default class Window extends View {
         this.firstResponser = this
     }
 
+    forceRender() {
+        drawloop.forceRender()
+    }
+
     static renderHtml() {
         return `<!DOCTYPE html>
         <head>
@@ -107,7 +111,10 @@ if (typeof window != 'undefined') {
 
         const ctx =  canvas.getContext("2d");
         ctx.scale(scale, scale)
-        rootWindow.size = new Size(w,h)
+        drawloop.performWithoutRender(() => {
+            rootWindow.size = new Size(w,h)
+        })
+        rootWindow.forceRender()
 	}
 
     function addTouchListener() {

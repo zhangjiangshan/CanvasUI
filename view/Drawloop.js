@@ -5,21 +5,37 @@ class Drawloop {
     constructor() {
         this.needsRender = false
         this.keyWindow = nil
+        this.trackRender = true
+
     }
 
     render() {
         console.log("begin render")
-        this.keyWindow._render()
+        if (this.keyWindow) {
+            this.keyWindow._render()
+        }
         console.log("end render")
     }
 
     needsForRender() {
-        if (this.needsRender === false) {
+        if (this.trackRender && this.needsRender === false) {
             this.needsRender = true
-            this.render()
-            this.needsRender = false
-            //setTimeout(() => {this.render()}, 1);
+            setTimeout(() => {
+                this.render()
+                this.needsRender = false
+            }, 1);
         }
+    }
+
+    performWithoutRender(func) {
+        this.trackRender = false
+        func()
+        this.trackRender = true
+    }
+
+    forceRender() {
+        this.render()
+        this.needsRender = false
     }
 }
 

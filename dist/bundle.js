@@ -82,16 +82,23 @@ var RootView = function (_View) {
         var image = new Image();
         image.src = "./static/test.png";
         var imageView = new _ImageView2.default(image);
-        imageView.position = new _Geometry.Point(60, 200);
+        imageView.position = new _Geometry.Point(60, 30);
         imageView.size = new _Geometry.Size(100, 100);
         imageView.equalRatio = _ImageView.EqualRatio.FlexibleHeight;
         imageView.backgroundColor = "#8800AA";
         _this.addSubview(imageView);
 
-        imageView.addSubview(label);
+        // imageView.addSubview(label)
+        // imageView.clipToBounds = true
+
+        var view = new _View3.default(0, 100, 40, 200);
+        view.backgroundColor = "blue";
+        view.clipToBounds = true;
+        view.addSubview(label);
+        _this.addSubview(view);
 
         var imageView2 = new _ImageView2.default(image);
-        imageView2.position = new _Geometry.Point(60, 400);
+        imageView2.position = new _Geometry.Point(60, 200);
         imageView2.size = new _Geometry.Size(100, 100);
         imageView2.equalRatio = _ImageView.EqualRatio.FlexibleWidth;
         imageView2.backgroundColor = "#8800AA";
@@ -312,6 +319,21 @@ var CGContext = function () {
             }
         }
     }, {
+        key: 'clip',
+        value: function clip(rect) {
+            var rule = arguments.length <= 1 || arguments[1] === undefined ? "nonzero" : arguments[1];
+
+            var _convertPoint9 = this.convertPoint(rect.position);
+
+            var _convertPoint10 = _slicedToArray(_convertPoint9, 2);
+
+            var x = _convertPoint10[0];
+            var y = _convertPoint10[1];
+
+            this.context.rect(x, y, rect.size.width, rect.size.height);
+            this.context.clip(rule);
+        }
+    }, {
         key: 'context',
         get: function get() {
             return this.view.getContext();
@@ -381,24 +403,43 @@ var Drawloop = function () {
 
         this.needsRender = false;
         this.keyWindow = _Util.nil;
+        this.trackRender = true;
     }
 
     _createClass(Drawloop, [{
         key: "render",
         value: function render() {
             console.log("begin render");
-            this.keyWindow._render();
+            if (this.keyWindow) {
+                this.keyWindow._render();
+            }
             console.log("end render");
         }
     }, {
         key: "needsForRender",
         value: function needsForRender() {
-            if (this.needsRender === false) {
+            var _this = this;
+
+            if (this.trackRender && this.needsRender === false) {
                 this.needsRender = true;
-                this.render();
-                this.needsRender = false;
-                //setTimeout(() => {this.render()}, 1);
+                setTimeout(function () {
+                    _this.render();
+                    _this.needsRender = false;
+                }, 1);
             }
+        }
+    }, {
+        key: "performWithoutRender",
+        value: function performWithoutRender(func) {
+            this.trackRender = false;
+            func();
+            this.trackRender = true;
+        }
+    }, {
+        key: "forceRender",
+        value: function forceRender() {
+            this.render();
+            this.needsRender = false;
         }
     }]);
 
@@ -927,6 +968,7 @@ var View = function (_BaseObject) {
         _this.superview = _Util.nil;
         _this.window = _Util.nil;
         _this.userInteractionEnabled = true;
+        _this._clipToBounds = false;
         return _this;
     }
 
@@ -1049,8 +1091,12 @@ var View = function (_BaseObject) {
     }, {
         key: 'addSubview',
         value: function addSubview(view) {
+            if (view.superview === this) {
+                return;
+            }
             view.willMoveToSuperview(this);
             view.willMoveToWindow(this.window);
+            view.removeFromSuperview();
             view.window = this.window;
 
             this.subviews.push(view);
@@ -1075,8 +1121,8 @@ var View = function (_BaseObject) {
     }, {
         key: 'removeFromSuperview',
         value: function removeFromSuperview() {
-            if (this.superView) {
-                this.superView.removeSubview(this);
+            if (this.superview) {
+                this.superview.removeSubview(this);
             }
         }
     }, {
@@ -1217,6 +1263,9 @@ var View = function (_BaseObject) {
             console.log('render:' + this.toString());
             var ctx = new _CGContext2.default(this);
             ctx.save();
+            if (this.clipToBounds) {
+                ctx.clip({ position: new _Geometry.Point(), size: this.size.copy() }, "nonzero");
+            }
             this.render(ctx);
             var _iteratorNormalCompletion4 = true;
             var _didIteratorError4 = false;
@@ -1345,6 +1394,17 @@ var View = function (_BaseObject) {
         set: function set(newValue) {
             if (this._alpha != newValue) {
                 this._alpha = newValue;
+                this._checkAndSetNeedsRender();
+            }
+        }
+    }, {
+        key: 'clipToBounds',
+        get: function get() {
+            return this._clipToBounds;
+        },
+        set: function set(newValue) {
+            if (this._clipToBounds != newValue) {
+                this._clipToBounds = newValue;
                 this._checkAndSetNeedsRender();
             }
         }
@@ -1520,6 +1580,11 @@ var Window = function (_View) {
             }
             this.firstResponser = this;
         }
+    }, {
+        key: 'forceRender',
+        value: function forceRender() {
+            _Drawloop.drawloop.forceRender();
+        }
     }], [{
         key: 'renderHtml',
         value: function renderHtml() {
@@ -1562,7 +1627,10 @@ if (typeof window != 'undefined') {
 
             var ctx = canvas.getContext("2d");
             ctx.scale(scale, scale);
-            rootWindow.size = new _Geometry.Size(w, h);
+            _Drawloop.drawloop.performWithoutRender(function () {
+                rootWindow.size = new _Geometry.Size(w, h);
+            });
+            rootWindow.forceRender();
         };
 
         var addTouchListener = function addTouchListener() {

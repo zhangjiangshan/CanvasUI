@@ -17,6 +17,7 @@ export default class View extends BaseObject {
         this.superview = nil
         this.window = nil
         this.userInteractionEnabled = true
+        this._clipToBounds = false
     }
 
     get backgroundColor() {
@@ -35,6 +36,16 @@ export default class View extends BaseObject {
     set alpha(newValue){
         if (this._alpha != newValue) {
             this._alpha = newValue
+            this._checkAndSetNeedsRender()
+        }
+    }
+
+    get clipToBounds() {
+        return this._clipToBounds;
+    }
+    set clipToBounds(newValue){
+        if (this._clipToBounds != newValue) {
+            this._clipToBounds = newValue
             this._checkAndSetNeedsRender()
         }
     }
@@ -185,8 +196,12 @@ export default class View extends BaseObject {
     }
 
     addSubview(view) {
+        if (view.superview === this) {
+            return
+        }
         view.willMoveToSuperview(this)
         view.willMoveToWindow(this.window)
+        view.removeFromSuperview()
         view.window = this.window
 
         this.subviews.push(view)
@@ -209,8 +224,8 @@ export default class View extends BaseObject {
     }
 
     removeFromSuperview() {
-        if (this.superView) {
-            this.superView.removeSubview(this)
+        if (this.superview) {
+            this.superview.removeSubview(this)
         }
     }
 
@@ -302,6 +317,9 @@ export default class View extends BaseObject {
         console.log(`render:${this.toString()}`)
         const ctx = new CGContext(this)
         ctx.save()
+        if (this.clipToBounds) {
+            ctx.clip({position:(new Point()), size:this.size.copy()}, "nonzero")
+        }
         this.render(ctx)
         for (let view of this.subviews) {
             view._render()

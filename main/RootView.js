@@ -21,16 +21,24 @@ export default class RootView extends View {
         const image = new Image()
         image.src = "./static/test.png"
         const imageView = new ImageView(image)
-        imageView.position = new Point(60, 200)
+        imageView.position = new Point(60, 30)
         imageView.size = new Size(100, 100)
         imageView.equalRatio = EqualRatio.FlexibleHeight
         imageView.backgroundColor = "#8800AA"
         this.addSubview(imageView)
 
-        imageView.addSubview(label)
+        // imageView.addSubview(label)
+        // imageView.clipToBounds = true
+
+        const view = new View(0, 100, 40, 200)
+        view.backgroundColor = "blue"
+        view.clipToBounds = true
+        view.addSubview(label)
+        this.addSubview(view)
+
 
         const imageView2 = new ImageView(image)
-        imageView2.position = new Point(60, 400)
+        imageView2.position = new Point(60, 200)
         imageView2.size = new Size(100, 100)
         imageView2.equalRatio = EqualRatio.FlexibleWidth
         imageView2.backgroundColor = "#8800AA"
