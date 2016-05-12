@@ -2,6 +2,7 @@
 import View from './View'
 import {Point, Size, Edge, ViewAutoresizing} from './Geometry'
 import CGContext from './CGContext'
+import {nil} from '../util/Util'
 
 export const EqualRatio = {
     None:                  0,
@@ -72,8 +73,11 @@ export default class ImageView extends View {
     }
 
     _renderWithImage(image) {
+        if (!image) {
+            return
+        }
         if (this.autoSizing) {
-            this.size = new Size(this._image.width, this._image.height)
+            this.size = new Size(image.width, image.height)
         } else if (this.equalRatio == EqualRatio.FlexibleHeight) {
             const imageRatio = image.height / image.width
             this.size = new Size(this.size.width, imageRatio * this.size.width)
@@ -86,6 +90,9 @@ export default class ImageView extends View {
 
     render(ctx) {
         super.render(ctx)
+        if (!this.image) {
+            return
+        }
         ctx.drawImage(this.image, 0, 0, this.image.width, this.image.height, 0, 0, this.size.width, this.size.height)
     }
 }

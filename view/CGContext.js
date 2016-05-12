@@ -131,15 +131,21 @@ export default class CGContext {
         return new Size(width, y + lineHeight)
     }
 
-    static createImageContext(width, height) {
+    static createImage(width, height, drawFunc) {
         var canvas = document.createElement(uuid.v1());
-        canvas.width = width;
-        canvas.height = height;
+        const canvasWidth = w * scale
+        const canvasHeight = h * scale
+        canvas.width  = canvasWidth
+        canvas.height = canvasHeight
+        canvas.style.width = w + "px"
+        canvas.style.height = h + "px"
         var ctx = canvas.getContext("2d");
-        ctx.fillStyle = "red";
-        ctx.fillRect(0, 0, 100, 100);
+        drawFunc(ctx, width, height)
+        // ctx.fillStyle = "red";
+        // ctx.fillRect(0, 0, 100, 100);
 
         var img = document.createElement("img");
         img.src = canvas.toDataURL("image/png");
+        return img
     }
 }

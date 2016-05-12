@@ -31,7 +31,7 @@ var _RootView2 = _interopRequireDefault(_RootView);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"./main/RootView":2,"./util/Array":3,"./util/Util":4,"./view/BaseObject":5,"./view/Geometry":9,"./view/Label":11,"./view/View":13,"./view/Window":14}],2:[function(require,module,exports){
+},{"./main/RootView":2,"./util/Array":3,"./util/Util":4,"./view/BaseObject":5,"./view/Geometry":10,"./view/Label":12,"./view/View":14,"./view/Window":15}],2:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -51,6 +51,10 @@ var _Label2 = _interopRequireDefault(_Label);
 var _ImageView = require('../view/ImageView');
 
 var _ImageView2 = _interopRequireDefault(_ImageView);
+
+var _Button = require('../view/Button');
+
+var _Button2 = _interopRequireDefault(_Button);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -103,6 +107,18 @@ var RootView = function (_View) {
         imageView2.equalRatio = _ImageView.EqualRatio.FlexibleWidth;
         imageView2.backgroundColor = "#8800AA";
         _this.addSubview(imageView2);
+
+        var button = new _Button2.default();
+        button.size = new _Geometry.Size(44, 44);
+        button.position = new _Geometry.Point(500, 50);
+        button.setBackgroundColor("blue", _Button.ControlState.Normal);
+        button.setBackgroundColor("red", _Button.ControlState.Highlighted);
+        _this.addSubview(button);
+        button.target = self;
+        button.func = function () {
+            console.log("button clicked!!!!!");
+        };
+
         return _this;
     }
 
@@ -111,7 +127,7 @@ var RootView = function (_View) {
 
 exports.default = RootView;
 
-},{"../view/Geometry":9,"../view/ImageView":10,"../view/Label":11,"../view/View":13}],3:[function(require,module,exports){
+},{"../view/Button":6,"../view/Geometry":10,"../view/ImageView":11,"../view/Label":12,"../view/View":14}],3:[function(require,module,exports){
 "use strict";
 
 Array.prototype.indexOfOld = Array.prototype.indexOf;
@@ -205,6 +221,167 @@ var BaseObject = function () {
 exports.default = BaseObject;
 
 },{}],6:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.ControlState = undefined;
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _Util = require('../util/Util');
+
+var _Geometry = require('./Geometry');
+
+var _Font = require('./Font');
+
+var _Font2 = _interopRequireDefault(_Font);
+
+var _Label = require('./Label');
+
+var _Label2 = _interopRequireDefault(_Label);
+
+var _ImageView = require('./ImageView');
+
+var _ImageView2 = _interopRequireDefault(_ImageView);
+
+var _View2 = require('./View');
+
+var _View3 = _interopRequireDefault(_View2);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var ControlState = exports.ControlState = {
+    Normal: 0,
+    Highlighted: 1,
+    Disabled: 1 << 1,
+    Selected: 1 << 2
+};
+
+var Button = function (_View) {
+    _inherits(Button, _View);
+
+    function Button(target, func) {
+        _classCallCheck(this, Button);
+
+        var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Button).call(this));
+
+        _this._controlState = ControlState.Normal;
+        _this.backgroundImageView = new _ImageView2.default();
+        _this.addSubview(_this.backgroundImageView);
+        _this.imageView = new _ImageView2.default();
+        _this.addSubview(_this.imageView);
+        _this.titleLabel = new _Label2.default();
+        _this.addSubview(_this.titleLabel);
+        _this.func = func;
+        _this.target = target;
+        _this.images = {};
+        _this.backgroundImages = {};
+        _this.backgroundColors = {};
+        _this.titleColors = {};
+        _this.titleColors[ControlState.Normal] = "black";
+        _this.titles = {};
+        _this._enable = false;
+        return _this;
+    }
+
+    _createClass(Button, [{
+        key: 'setBackgroundColor',
+        value: function setBackgroundColor(color, controlState) {
+            this.backgroundColors[controlState] = color;
+        }
+    }, {
+        key: 'setBackgroundImage',
+        value: function setBackgroundImage(image, controlState) {
+            this.backgroundImages[controlState] = image;
+        }
+    }, {
+        key: 'setImage',
+        value: function setImage(image, controlState) {
+            this.images[controlState] = image;
+        }
+    }, {
+        key: 'setTitleColor',
+        value: function setTitleColor(color, controlState) {
+            this.titleColors[controlState] = color;
+        }
+    }, {
+        key: 'setTitle',
+        value: function setTitle(title, controlState) {
+            this.titles[controlState] = title;
+        }
+    }, {
+        key: 'mouseDown',
+        value: function mouseDown(event) {
+            this.controlState = ControlState.Highlighted;
+            console.log('I\'m down ' + this.toString());
+        }
+    }, {
+        key: 'mouseMove',
+        value: function mouseMove(event) {
+            console.log('I\'m move ' + this.toString());
+        }
+    }, {
+        key: 'mouseUp',
+        value: function mouseUp(event) {
+            this.controlState = ControlState.Normal;
+            console.log('I\'m up ' + this.toString());
+            if (this.func && this.target) {
+                this.func.apply(this.target, this);
+            }
+        }
+    }, {
+        key: 'mouseCancel',
+        value: function mouseCancel(event) {
+            this.controlState = ControlState.Normal;
+            console.log('I\'m cancel ' + this.toString());
+        }
+    }, {
+        key: 'controlState',
+        get: function get() {
+            return this._controlState;
+        },
+        set: function set(newValue) {
+            if (this._controlState != newValue) {
+                this._controlState = newValue;
+                this.backgroundImageView.image = this.backgroundImages[newValue] || this.backgroundImages[ControlState.Normal];
+                this.titleLabel.text = this.titles[newValue] || this.titles[ControlState.Normal] || "";
+                this.imageView.image = this.images[newValue] || this.images[ControlState.Normal];
+                this.backgroundColor = this.backgroundColors[newValue] || this.backgroundColors[ControlState.Normal];
+
+                this._checkAndSetNeedsRender();
+            }
+        }
+    }, {
+        key: 'enable',
+        get: function get() {
+            return this._controlState;
+        },
+        set: function set(newValue) {
+            if (this._enable != newValue) {
+                this._enable = newValue;
+                if (!newValue) {
+                    this.controlState = ControlState.Disabled;
+                } else if (this.controlState === ControlState.Disabled) {
+                    this.controlState = ControlState.Normal;
+                }
+            }
+        }
+    }]);
+
+    return Button;
+}(_View3.default);
+
+exports.default = Button;
+
+},{"../util/Util":4,"./Font":9,"./Geometry":10,"./ImageView":11,"./Label":12,"./View":14}],7:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -405,6 +582,25 @@ var CGContext = function () {
                 this.context.font = this.font.getFontText();
             }
         }
+    }], [{
+        key: 'createImage',
+        value: function createImage(width, height, drawFunc) {
+            var canvas = document.createElement(uuid.v1());
+            var canvasWidth = w * scale;
+            var canvasHeight = h * scale;
+            canvas.width = canvasWidth;
+            canvas.height = canvasHeight;
+            canvas.style.width = w + "px";
+            canvas.style.height = h + "px";
+            var ctx = canvas.getContext("2d");
+            drawFunc(ctx, width, height);
+            // ctx.fillStyle = "red";
+            // ctx.fillRect(0, 0, 100, 100);
+
+            var img = document.createElement("img");
+            img.src = canvas.toDataURL("image/png");
+            return img;
+        }
     }]);
 
     return CGContext;
@@ -412,7 +608,7 @@ var CGContext = function () {
 
 exports.default = CGContext;
 
-},{"../util/Util.js":4,"./Geometry":9}],7:[function(require,module,exports){
+},{"../util/Util.js":4,"./Geometry":10}],8:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -438,11 +634,9 @@ var Drawloop = function () {
     _createClass(Drawloop, [{
         key: "render",
         value: function render() {
-            console.log("begin render");
             if (this.keyWindow) {
                 this.keyWindow._render();
             }
-            console.log("end render");
         }
     }, {
         key: "needsForRender",
@@ -477,7 +671,7 @@ var Drawloop = function () {
 
 var drawloop = exports.drawloop = new Drawloop();
 
-},{"../util/Util.js":4}],8:[function(require,module,exports){
+},{"../util/Util.js":4}],9:[function(require,module,exports){
 "use strict";
 
 /*
@@ -528,7 +722,7 @@ var Font = function () {
 
 exports.default = Font;
 
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -687,7 +881,7 @@ var ViewAutoresizing = exports.ViewAutoresizing = {
     FlexibleBottomMargin: 1 << 5
 };
 
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -709,6 +903,8 @@ var _CGContext = require('./CGContext');
 
 var _CGContext2 = _interopRequireDefault(_CGContext);
 
+var _Util = require('../util/Util');
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -727,7 +923,7 @@ var ImageView = function (_View) {
     _inherits(ImageView, _View);
 
     function ImageView() {
-        var image = arguments.length <= 0 || arguments[0] === undefined ? nil : arguments[0];
+        var image = arguments.length <= 0 || arguments[0] === undefined ? _Util.nil : arguments[0];
 
         _classCallCheck(this, ImageView);
 
@@ -751,8 +947,11 @@ var ImageView = function (_View) {
     }, {
         key: '_renderWithImage',
         value: function _renderWithImage(image) {
+            if (!image) {
+                return;
+            }
             if (this.autoSizing) {
-                this.size = new _Geometry.Size(this._image.width, this._image.height);
+                this.size = new _Geometry.Size(image.width, image.height);
             } else if (this.equalRatio == EqualRatio.FlexibleHeight) {
                 var imageRatio = image.height / image.width;
                 this.size = new _Geometry.Size(this.size.width, imageRatio * this.size.width);
@@ -766,6 +965,9 @@ var ImageView = function (_View) {
         key: 'render',
         value: function render(ctx) {
             _get(Object.getPrototypeOf(ImageView.prototype), 'render', this).call(this, ctx);
+            if (!this.image) {
+                return;
+            }
             ctx.drawImage(this.image, 0, 0, this.image.width, this.image.height, 0, 0, this.size.width, this.size.height);
         }
     }, {
@@ -826,7 +1028,7 @@ var ImageView = function (_View) {
 
 exports.default = ImageView;
 
-},{"./CGContext":6,"./Geometry":9,"./View":13}],11:[function(require,module,exports){
+},{"../util/Util":4,"./CGContext":7,"./Geometry":10,"./View":14}],12:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -969,7 +1171,7 @@ var Label = function (_View) {
 
 exports.default = Label;
 
-},{"../util/Util":4,"./Font":8,"./Geometry":9,"./View":13}],12:[function(require,module,exports){
+},{"../util/Util":4,"./Font":9,"./Geometry":10,"./View":14}],13:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -992,7 +1194,7 @@ var TouchEvent = function TouchEvent() {
 
 exports.default = TouchEvent;
 
-},{"../util/Util":4}],13:[function(require,module,exports){
+},{"../util/Util":4}],14:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1337,7 +1539,7 @@ var View = function (_BaseObject) {
     }, {
         key: '_render',
         value: function _render() {
-            console.log('render:' + this.toString());
+            //console.log(`render:${this.toString()}`)
             var ctx = new _CGContext2.default(this);
             ctx.save();
             if (this.clipToBounds) {
@@ -1554,7 +1756,7 @@ var View = function (_BaseObject) {
 
 exports.default = View;
 
-},{"../util/Util.js":4,"./BaseObject":5,"./CGContext":6,"./Drawloop":7,"./Geometry":9}],14:[function(require,module,exports){
+},{"../util/Util.js":4,"./BaseObject":5,"./CGContext":7,"./Drawloop":8,"./Geometry":10}],15:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1608,6 +1810,7 @@ var Window = function (_View) {
         _this.backgroundColor = "#00a488";
         _this.rootView = _Util.nil;
         _this.firstResponser = _this;
+        _this.isDown = false;
         return _this;
     }
 
@@ -1638,12 +1841,13 @@ var Window = function (_View) {
     }, {
         key: 'receiveMouseDown',
         value: function receiveMouseDown(point) {
+            this.isDown = true;
             var p = new _Geometry.Point(point[0], point[1]);
             var responser = this.hitTest(p);
             this.firstResponser = responser;
 
             var event = new _TouchEvent2.default();
-            event.isDown = true;
+            event.isDown = this.isDown;
             event.firstResponser = responser;
             event.point = this.convertPointToView(p, event.firstResponser);
             event.windowPoint = p;
@@ -1655,26 +1859,27 @@ var Window = function (_View) {
         key: 'receiveMouseMove',
         value: function receiveMouseMove(point) {
             var p = new _Geometry.Point(point[0], point[1]);
-            var responser = this.firstResponser;
-            if (responser === this) {
-                responser = this.hitTest(p);
-            }
+
             var event = new _TouchEvent2.default();
-            event.isDown = !!this.firstResponser;
-            event.firstResponser = responser;
+            event.isDown = this.isDown;
+            if (event.isDown) {
+                event.firstResponser = this.firstResponser;
+            } else {
+                event.firstResponser = this.hitTest(p);
+            }
             event.point = this.convertPointToView(p, event.firstResponser);
             event.windowPoint = p;
             event.event = "mouseMove";
-
-            this.firstResponser.mouseMove(event);
+            event.firstResponser.mouseMove(event);
         }
     }, {
         key: 'receiveMouseUp',
         value: function receiveMouseUp(point) {
+            this.isDown = false;
             var p = new _Geometry.Point(point[0], point[1]);
 
             var event = new _TouchEvent2.default();
-            event.isDown = false;
+            event.isDown = this.isDown;
             event.firstResponser = this.firstResponser;
             event.point = this.convertPointToView(p, event.firstResponser);
             event.windowPoint = p;
@@ -1789,4 +1994,4 @@ if (typeof window != 'undefined') {
     })();
 }
 
-},{"../main/RootView":2,"../util/Util":4,"./Drawloop":7,"./Geometry":9,"./TouchEvent":12,"./View":13}]},{},[1]);
+},{"../main/RootView":2,"../util/Util":4,"./Drawloop":8,"./Geometry":10,"./TouchEvent":13,"./View":14}]},{},[1]);

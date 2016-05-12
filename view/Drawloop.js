@@ -10,11 +10,9 @@ class Drawloop {
     }
 
     render() {
-        console.log("begin render")
         if (this.keyWindow) {
             this.keyWindow._render()
         }
-        console.log("end render")
     }
 
     needsForRender() {

@@ -13,6 +13,7 @@ export default class Window extends View {
         this.backgroundColor = "#00a488"
         this.rootView = nil
         this.firstResponser = this
+        this.isDown = false
     }
 
     render(context) {
@@ -38,12 +39,13 @@ export default class Window extends View {
     }
 
     receiveMouseDown(point) {
+        this.isDown = true
         const p = new Point(point[0], point[1])
         const responser = this.hitTest(p)
         this.firstResponser = responser
 
         const event = new TouchEvent()
-        event.isDown = true
+        event.isDown = this.isDown
         event.firstResponser = responser
         event.point = this.convertPointToView(p, event.firstResponser)
         event.windowPoint = p
@@ -54,25 +56,26 @@ export default class Window extends View {
 
     receiveMouseMove(point) {
         const p = new Point(point[0], point[1])
-        let responser = this.firstResponser
-        if (responser === this) {
-            responser = this.hitTest(p)
-        }
+
         const event = new TouchEvent()
-        event.isDown = !!this.firstResponser
-        event.firstResponser = responser
+        event.isDown = this.isDown
+        if (event.isDown) {
+            event.firstResponser = this.firstResponser
+        } else {
+            event.firstResponser = this.hitTest(p)
+        }
         event.point = this.convertPointToView(p, event.firstResponser)
         event.windowPoint = p
         event.event = "mouseMove"
-
-        this.firstResponser.mouseMove(event)
+        event.firstResponser.mouseMove(event)
     }
 
     receiveMouseUp(point) {
+        this.isDown = false
         const p = new Point(point[0], point[1])
 
         const event = new TouchEvent()
-        event.isDown = false
+        event.isDown = this.isDown
         event.firstResponser = this.firstResponser
         event.point = this.convertPointToView(p, event.firstResponser)
         event.windowPoint = p

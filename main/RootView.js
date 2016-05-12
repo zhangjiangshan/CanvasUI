@@ -3,6 +3,7 @@ import View from '../view/View'
 import {Point, Size, Edge, ViewAutoresizing} from '../view/Geometry'
 import Label from '../view/Label'
 import ImageView, {EqualRatio} from '../view/ImageView'
+import Button, {ControlState} from '../view/Button'
 
 export default class RootView extends View {
     constructor() {
@@ -43,5 +44,18 @@ export default class RootView extends View {
         imageView2.equalRatio = EqualRatio.FlexibleWidth
         imageView2.backgroundColor = "#8800AA"
         this.addSubview(imageView2)
+
+        const button = new Button()
+        button.size = new Size(44,44)
+        button.position = new Point(500, 50)
+        button.setBackgroundColor("blue", ControlState.Normal)
+        button.setBackgroundColor("red", ControlState.Highlighted)
+        this.addSubview(button)
+        button.target = self
+        button.func = () => {
+            console.log("button clicked!!!!!")
+        }
+
+
     }
 }

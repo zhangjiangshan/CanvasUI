@@ -314,7 +314,7 @@ export default class View extends BaseObject {
     }
 
     _render() {
-        console.log(`render:${this.toString()}`)
+        //console.log(`render:${this.toString()}`)
         const ctx = new CGContext(this)
         ctx.save()
         if (this.clipToBounds) {
