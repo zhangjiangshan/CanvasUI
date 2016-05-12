@@ -360,19 +360,19 @@ export default class View extends BaseObject {
         return isPointIn(point, this.position, this.size)
     }
 
-    mouseDown(p) {
+    mouseDown(event) {
         console.log(`I'm down ${this.toString()}`)
     }
 
-    mouseMove(p) {
+    mouseMove(event) {
         console.log(`I'm move ${this.toString()}`)
     }
 
-    mouseUp(p) {
+    mouseUp(event) {
         console.log(`I'm up ${this.toString()}`)
     }
 
-    mouseCancel(p) {
+    mouseCancel(event) {
         console.log(`I'm cancel ${this.toString()}`)
     }
 

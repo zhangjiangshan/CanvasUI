@@ -4,6 +4,7 @@ import View from './View'
 import {drawloop} from './Drawloop'
 import RootView from '../main/RootView'
 import {Point, Size, Edge, ViewAutoresizing} from './Geometry'
+import TouchEvent from './TouchEvent'
 
 export default class Window extends View {
     constructor(x=0, y=0, width=0, height=0) {
@@ -40,21 +41,49 @@ export default class Window extends View {
         const p = new Point(point[0], point[1])
         const responser = this.hitTest(p)
         this.firstResponser = responser
-        this.firstResponser.mouseDown(this.convertPointToView(p, this.firstResponser))
+
+        const event = new TouchEvent()
+        event.isDown = true
+        event.firstResponser = responser
+        event.point = this.convertPointToView(p, event.firstResponser)
+        event.windowPoint = p
+        event.event = "mouseDown"
+
+        this.firstResponser.mouseDown(event)
     }
 
     receiveMouseMove(point) {
         const p = new Point(point[0], point[1])
-        //this.firstResponser.mouseMove(this.convertPointToView(p, this.firstResponser))
+        let responser = this.firstResponser
+        if (responser === this) {
+            responser = this.hitTest(p)
+        }
+        const event = new TouchEvent()
+        event.isDown = !!this.firstResponser
+        event.firstResponser = responser
+        event.point = this.convertPointToView(p, event.firstResponser)
+        event.windowPoint = p
+        event.event = "mouseMove"
+
+        this.firstResponser.mouseMove(event)
     }
 
     receiveMouseUp(point) {
         const p = new Point(point[0], point[1])
+
+        const event = new TouchEvent()
+        event.isDown = false
+        event.firstResponser = this.firstResponser
+        event.point = this.convertPointToView(p, event.firstResponser)
+        event.windowPoint = p
+
         const responser = this.hitTest(p)
         if (this.firstResponser === responser) {
-            this.firstResponser.mouseUp(this.convertPointToView(p, this.firstResponser))
+            event.event = "mouseUp"
+            this.firstResponser.mouseUp(event)
         } else {
-            this.firstResponser.mouseCancel(this.convertPointToView(p, this.firstResponser))
+            event.event = "mouseCancel"
+            this.firstResponser.mouseCancel(event)
         }
         this.firstResponser = this
     }

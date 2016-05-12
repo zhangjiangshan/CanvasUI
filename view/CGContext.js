@@ -65,28 +65,30 @@ export default class CGContext {
     }
 
     wrapText(text, px, py, maxWidth, lineHeight=26) {
+        this.context.textBaseline = "top"
         let [x, y] = this.convertPoint(new Point(px, py))
 
-        var words = text.split('');
-        var line = '';
-
-        for(var n = 0; n < words.length; n++) {
-            var testLine = line + words[n] + '';
-            var metrics = this.context.measureText(testLine);
-            var testWidth = metrics.width;
+        let words = text.split('')
+        let line = ''
+        for(let n = 0; n < words.length; n++) {
+            let testLine = line + words[n] + ''
+            let testWidth = this.measureText(testLine)
             if (testWidth > maxWidth && n > 0) {
-                this.context.fillText(line, x, y);
-                line = words[n] + '';
-                y += lineHeight;
+                this.context.fillText(line, x, y)
+                line = words[n] + ''
+                y += lineHeight
             } else {
-                line = testLine;
+                line = testLine
             }
         }
-        this.context.fillText(line, x, y);
+        this.context.fillText(line, x, y)
+        const width = ((y == 0) ? this.measureText(text) : maxWidth)
+        return new Size(width, y )
     }
 
     fillText(text, px, py, maxWidth=9999) {
         const [x, y] = this.convertPoint(new Point(px, py))
+        this.context.textBaseline = "top"
         this.context.fillText(text, x, y, maxWidth);
     }
 
@@ -104,5 +106,40 @@ export default class CGContext {
         const [x, y] = this.convertPoint(rect.position)
         this.context.rect(x, y, rect.size.width, rect.size.height)
         this.context.clip(rule)
+    }
+
+    measureText(text) {
+        return this.context.measureText(text).width
+    }
+
+    measureMultiLineText(text, maxWidth, lineHeight) {
+        let x = 0, y = 0
+
+        let words = text.split('')
+        let line = ''
+        for(let n = 0; n < words.length; n++) {
+            let testLine = line + words[n] + ''
+            let testWidth = this.measureText(testLine);
+            if (testWidth > maxWidth && n > 0) {
+                line = words[n] + ''
+                y += lineHeight
+            } else {
+                line = testLine
+            }
+        }
+        const width = ((y == 0) ? this.measureText(text) : maxWidth)
+        return new Size(width, y + lineHeight)
+    }
+
+    static createImageContext(width, height) {
+        var canvas = document.createElement(uuid.v1());
+        canvas.width = width;
+        canvas.height = height;
+        var ctx = canvas.getContext("2d");
+        ctx.fillStyle = "red";
+        ctx.fillRect(0, 0, 100, 100);
+
+        var img = document.createElement("img");
+        img.src = canvas.toDataURL("image/png");
     }
 }

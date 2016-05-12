@@ -31,7 +31,7 @@ var _RootView2 = _interopRequireDefault(_RootView);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"./main/RootView":2,"./util/Array":3,"./util/Util":4,"./view/BaseObject":5,"./view/Geometry":9,"./view/Label":11,"./view/View":12,"./view/Window":13}],2:[function(require,module,exports){
+},{"./main/RootView":2,"./util/Array":3,"./util/Util":4,"./view/BaseObject":5,"./view/Geometry":9,"./view/Label":11,"./view/View":13,"./view/Window":14}],2:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -111,7 +111,7 @@ var RootView = function (_View) {
 
 exports.default = RootView;
 
-},{"../view/Geometry":9,"../view/ImageView":10,"../view/Label":11,"../view/View":12}],3:[function(require,module,exports){
+},{"../view/Geometry":9,"../view/ImageView":10,"../view/Label":11,"../view/View":13}],3:[function(require,module,exports){
 "use strict";
 
 Array.prototype.indexOfOld = Array.prototype.indexOf;
@@ -262,6 +262,8 @@ var CGContext = function () {
         value: function wrapText(text, px, py, maxWidth) {
             var lineHeight = arguments.length <= 4 || arguments[4] === undefined ? 26 : arguments[4];
 
+            this.context.textBaseline = "top";
+
             var _convertPoint3 = this.convertPoint(new _Geometry.Point(px, py));
 
             var _convertPoint4 = _slicedToArray(_convertPoint3, 2);
@@ -272,11 +274,9 @@ var CGContext = function () {
 
             var words = text.split('');
             var line = '';
-
             for (var n = 0; n < words.length; n++) {
                 var testLine = line + words[n] + '';
-                var metrics = this.context.measureText(testLine);
-                var testWidth = metrics.width;
+                var testWidth = this.measureText(testLine);
                 if (testWidth > maxWidth && n > 0) {
                     this.context.fillText(line, x, y);
                     line = words[n] + '';
@@ -286,6 +286,8 @@ var CGContext = function () {
                 }
             }
             this.context.fillText(line, x, y);
+            var width = y == 0 ? this.measureText(text) : maxWidth;
+            return new _Geometry.Size(width, y);
         }
     }, {
         key: 'fillText',
@@ -299,6 +301,7 @@ var CGContext = function () {
             var x = _convertPoint6[0];
             var y = _convertPoint6[1];
 
+            this.context.textBaseline = "top";
             this.context.fillText(text, x, y, maxWidth);
         }
     }, {
@@ -332,6 +335,32 @@ var CGContext = function () {
 
             this.context.rect(x, y, rect.size.width, rect.size.height);
             this.context.clip(rule);
+        }
+    }, {
+        key: 'measureText',
+        value: function measureText(text) {
+            return this.context.measureText(text).width;
+        }
+    }, {
+        key: 'measureMultiLineText',
+        value: function measureMultiLineText(text, maxWidth, lineHeight) {
+            var x = 0,
+                y = 0;
+
+            var words = text.split('');
+            var line = '';
+            for (var n = 0; n < words.length; n++) {
+                var testLine = line + words[n] + '';
+                var testWidth = this.measureText(testLine);
+                if (testWidth > maxWidth && n > 0) {
+                    line = words[n] + '';
+                    y += lineHeight;
+                } else {
+                    line = testLine;
+                }
+            }
+            var width = y == 0 ? this.measureText(text) : maxWidth;
+            return new _Geometry.Size(width, y + lineHeight);
         }
     }, {
         key: 'context',
@@ -797,7 +826,7 @@ var ImageView = function (_View) {
 
 exports.default = ImageView;
 
-},{"./CGContext":6,"./Geometry":9,"./View":12}],11:[function(require,module,exports){
+},{"./CGContext":6,"./Geometry":9,"./View":13}],11:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -845,19 +874,33 @@ var Label = function (_View) {
         _this._font = new _Font2.default();
         _this._text = _Util.nil;
         _this._textColor = "black";
+        _this._lineHeight = parseFloat(_this.font);
         return _this;
     }
 
     _createClass(Label, [{
+        key: 'fitSize',
+        value: function fitSize() {
+            if (!this.text) {
+                return new _Geometry.Size();
+            } else {
+                if (this.isMultiLine) {
+                    return;
+                } else {
+                    var context = new CGContext(this);
+                    return new _Geometry.Size(context.measureText(this.text), this.lineHeight);
+                }
+            }
+        }
+    }, {
         key: 'render',
         value: function render(ctx) {
             _get(Object.getPrototypeOf(Label.prototype), 'render', this).call(this, ctx);
             var drawingText = this.text == _Util.nil ? "" : this.text;
             ctx.fillStyle = this.textColor;
             ctx.font = this.font;
-            ctx.textBaseline = "top";
             if (this.isMultiLine) {
-                ctx.wrapText(drawingText, 0, 0, this.size.width, parseInt(this.font.fontSize));
+                ctx.wrapText(drawingText, 0, 0, this.size.width, this.lineHeight);
             } else {
                 ctx.fillText(drawingText, 0, 0, this.size.width);
             }
@@ -908,6 +951,17 @@ var Label = function (_View) {
                 this._checkAndSetNeedsRender();
             }
         }
+    }, {
+        key: 'lineHeight',
+        get: function get() {
+            return this._lineHeight;
+        },
+        set: function set(newValue) {
+            if (this._lineHeight != newValue) {
+                this._lineHeight = newValue;
+                this._checkAndSetNeedsRender();
+            }
+        }
     }]);
 
     return Label;
@@ -915,7 +969,30 @@ var Label = function (_View) {
 
 exports.default = Label;
 
-},{"../util/Util":4,"./Font":8,"./Geometry":9,"./View":12}],12:[function(require,module,exports){
+},{"../util/Util":4,"./Font":8,"./Geometry":9,"./View":13}],12:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _Util = require("../util/Util");
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var TouchEvent = function TouchEvent() {
+    _classCallCheck(this, TouchEvent);
+
+    this.isDown = false;
+    this.firstResponser = _Util.nil;
+    this.point = _Util.nil;
+    this.windowPoint = _Util.nil;
+    this.event = _Util.nil;
+};
+
+exports.default = TouchEvent;
+
+},{"../util/Util":4}],13:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1357,22 +1434,22 @@ var View = function (_BaseObject) {
         }
     }, {
         key: 'mouseDown',
-        value: function mouseDown(p) {
+        value: function mouseDown(event) {
             console.log('I\'m down ' + this.toString());
         }
     }, {
         key: 'mouseMove',
-        value: function mouseMove(p) {
+        value: function mouseMove(event) {
             console.log('I\'m move ' + this.toString());
         }
     }, {
         key: 'mouseUp',
-        value: function mouseUp(p) {
+        value: function mouseUp(event) {
             console.log('I\'m up ' + this.toString());
         }
     }, {
         key: 'mouseCancel',
-        value: function mouseCancel(p) {
+        value: function mouseCancel(event) {
             console.log('I\'m cancel ' + this.toString());
         }
     }, {
@@ -1477,7 +1554,7 @@ var View = function (_BaseObject) {
 
 exports.default = View;
 
-},{"../util/Util.js":4,"./BaseObject":5,"./CGContext":6,"./Drawloop":7,"./Geometry":9}],13:[function(require,module,exports){
+},{"../util/Util.js":4,"./BaseObject":5,"./CGContext":6,"./Drawloop":7,"./Geometry":9}],14:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1501,6 +1578,10 @@ var _RootView = require('../main/RootView');
 var _RootView2 = _interopRequireDefault(_RootView);
 
 var _Geometry = require('./Geometry');
+
+var _TouchEvent = require('./TouchEvent');
+
+var _TouchEvent2 = _interopRequireDefault(_TouchEvent);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -1560,23 +1641,51 @@ var Window = function (_View) {
             var p = new _Geometry.Point(point[0], point[1]);
             var responser = this.hitTest(p);
             this.firstResponser = responser;
-            this.firstResponser.mouseDown(this.convertPointToView(p, this.firstResponser));
+
+            var event = new _TouchEvent2.default();
+            event.isDown = true;
+            event.firstResponser = responser;
+            event.point = this.convertPointToView(p, event.firstResponser);
+            event.windowPoint = p;
+            event.event = "mouseDown";
+
+            this.firstResponser.mouseDown(event);
         }
     }, {
         key: 'receiveMouseMove',
         value: function receiveMouseMove(point) {
             var p = new _Geometry.Point(point[0], point[1]);
-            //this.firstResponser.mouseMove(this.convertPointToView(p, this.firstResponser))
+            var responser = this.firstResponser;
+            if (responser === this) {
+                responser = this.hitTest(p);
+            }
+            var event = new _TouchEvent2.default();
+            event.isDown = !!this.firstResponser;
+            event.firstResponser = responser;
+            event.point = this.convertPointToView(p, event.firstResponser);
+            event.windowPoint = p;
+            event.event = "mouseMove";
+
+            this.firstResponser.mouseMove(event);
         }
     }, {
         key: 'receiveMouseUp',
         value: function receiveMouseUp(point) {
             var p = new _Geometry.Point(point[0], point[1]);
+
+            var event = new _TouchEvent2.default();
+            event.isDown = false;
+            event.firstResponser = this.firstResponser;
+            event.point = this.convertPointToView(p, event.firstResponser);
+            event.windowPoint = p;
+
             var responser = this.hitTest(p);
             if (this.firstResponser === responser) {
-                this.firstResponser.mouseUp(this.convertPointToView(p, this.firstResponser));
+                event.event = "mouseUp";
+                this.firstResponser.mouseUp(event);
             } else {
-                this.firstResponser.mouseCancel(this.convertPointToView(p, this.firstResponser));
+                event.event = "mouseCancel";
+                this.firstResponser.mouseCancel(event);
             }
             this.firstResponser = this;
         }
@@ -1680,4 +1789,4 @@ if (typeof window != 'undefined') {
     })();
 }
 
-},{"../main/RootView":2,"../util/Util":4,"./Drawloop":7,"./Geometry":9,"./View":12}]},{},[1]);
+},{"../main/RootView":2,"../util/Util":4,"./Drawloop":7,"./Geometry":9,"./TouchEvent":12,"./View":13}]},{},[1]);

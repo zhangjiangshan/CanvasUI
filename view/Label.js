@@ -11,6 +11,7 @@ export default class Label extends View {
         this._font = new Font()
         this._text = nil
         this._textColor = "black"
+        this._lineHeight = parseFloat(this.font)
     }
 
     get text() {
@@ -53,14 +54,36 @@ export default class Label extends View {
         }
     }
 
+    get lineHeight() {
+        return this._lineHeight;
+    }
+    set lineHeight(newValue){
+        if (this._lineHeight != newValue) {
+            this._lineHeight = newValue
+            this._checkAndSetNeedsRender()
+        }
+    }
+
+    fitSize() {
+        if (!this.text) {
+            return new Size()
+        } else {
+            if (this.isMultiLine) {
+                return
+            } else {
+                const context = new CGContext(this)
+                return new Size(context.measureText(this.text), this.lineHeight)
+            }
+        }
+    }
+
     render(ctx) {
         super.render(ctx)
         const drawingText = (this.text == nil ? "" : this.text)
         ctx.fillStyle = this.textColor
         ctx.font = this.font
-        ctx.textBaseline = "top"
         if (this.isMultiLine) {
-            ctx.wrapText(drawingText, 0, 0, this.size.width, parseInt(this.font.fontSize))
+            ctx.wrapText(drawingText, 0, 0, this.size.width, this.lineHeight)
         } else {
             ctx.fillText(drawingText, 0, 0, this.size.width)
         }
