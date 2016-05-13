@@ -33,10 +33,8 @@ export default class RootView extends View {
 
         const view = new View(0, 100, 40, 200)
         view.backgroundColor = "blue"
-        view.clipToBounds = true
         view.addSubview(label)
         this.addSubview(view)
-
 
         const imageView2 = new ImageView(image)
         imageView2.position = new Point(60, 200)
@@ -50,12 +48,11 @@ export default class RootView extends View {
         button.position = new Point(500, 50)
         button.setBackgroundColor("blue", ControlState.Normal)
         button.setBackgroundColor("red", ControlState.Highlighted)
+        button.setTitle("按钮", ControlState.Normal)
         this.addSubview(button)
         button.target = self
         button.func = () => {
             console.log("button clicked!!!!!")
         }
-
-
     }
 }

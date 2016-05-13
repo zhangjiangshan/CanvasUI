@@ -13,6 +13,7 @@ export const EqualRatio = {
 export default class ImageView extends View {
     constructor(image=nil) {
         super()
+        this.userInteractionEnabled = false
         this.image = image
         this._autoSizing = false
         this._equalRatio = EqualRatio.None

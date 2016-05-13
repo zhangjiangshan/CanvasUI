@@ -12,6 +12,7 @@ export default class View extends BaseObject {
         this._position = new Point(x, y)
         this._size = new Size(width, height)
         this._alpha = 1
+        this.backgroundAlpha = 1
         this.subviews = new Array()
         this.autoresizingMask = ViewAutoresizing.None
         this.superview = nil
@@ -320,17 +321,24 @@ export default class View extends BaseObject {
         if (this.clipToBounds) {
             ctx.clip({position:(new Point()), size:this.size.copy()}, "nonzero")
         }
-        this.render(ctx)
-        for (let view of this.subviews) {
-            view._render()
+        ctx.alpha = ctx.alpha * this.alpha
+        if (ctx.alpha != 0) {
+            this.render(ctx)
+            for (let view of this.subviews) {
+                view._render()
+            }
         }
         ctx.restore()
     }
 
     render(ctx) {
-        ctx.alpha = ctx.alpha * this.alpha
+        ctx.save()
         ctx.fillStyle = this.backgroundColor;
-        ctx.fillRect(0, 0, this.size.width, this.size.height);
+        ctx.alpha = ctx.alpha * this.backgroundAlpha
+        if (ctx.alpha != 0) {
+            ctx.fillRect(0, 0, this.size.width, this.size.height)
+        }
+        ctx.restore()
     }
 
     toString() {

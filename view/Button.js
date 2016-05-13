@@ -2,7 +2,7 @@
 import {nil} from '../util/Util'
 import {Point, Size, Edge, ViewAutoresizing} from './Geometry'
 import Font from './Font'
-import Label from './Label'
+import Label, {TextAlignment, VerticalAlignment} from './Label'
 import ImageView from './ImageView'
 import View from './View'
 
@@ -22,7 +22,12 @@ export default class Button extends View {
         this.imageView = new ImageView()
         this.addSubview(this.imageView)
         this.titleLabel = new Label()
+        this.titleLabel.clipToBounds = true
+        this.titleLabel.textAlignment = TextAlignment.Center
+        this.titleLabel.verticalAlignment = VerticalAlignment.Center
+        this.titleLabel.size = this.size.copy()
         this.addSubview(this.titleLabel)
+
         this.func = func
         this.target = target
         this.images = {}
@@ -36,22 +41,37 @@ export default class Button extends View {
 
     setBackgroundColor(color, controlState) {
         this.backgroundColors[controlState] = color
+        if (controlState == this.controlState) {
+            this.backgroundColor = color
+        }
     }
 
     setBackgroundImage(image, controlState) {
         this.backgroundImages[controlState] = image
+        if (controlState == this.controlState) {
+            this.backgroundImageView.image  = image
+        }
     }
 
     setImage(image, controlState) {
         this.images[controlState] = image
+        if (controlState == this.controlState) {
+            this.imageView.image  = image
+        }
     }
 
     setTitleColor(color, controlState) {
         this.titleColors[controlState] = color
+        if (controlState == this.controlState) {
+            this.titleLabel.textColor  = color
+        }
     }
 
     setTitle(title, controlState) {
         this.titles[controlState] = title
+        if (controlState == this.controlState) {
+            this.titleLabel.text  = title
+        }
     }
 
     get controlState() {
@@ -81,6 +101,11 @@ export default class Button extends View {
                 this.controlState = ControlState.Normal
             }
         }
+    }
+
+    layoutSubviews() {
+        super.layoutSubviews()
+        this.titleLabel.size = this.size.copy()
     }
 
     mouseDown(event) {

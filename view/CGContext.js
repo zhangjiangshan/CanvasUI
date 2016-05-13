@@ -6,6 +6,8 @@ export default class CGContext {
     constructor(view) {
         this.view = view
         this._font = nil
+        this.textBaseline = "top"
+        this.textAlign = "left"
     }
 
     get context() {
@@ -20,17 +22,24 @@ export default class CGContext {
     }
 
     get fillStyle() {
-        return this.context.fillStyle;
+        return this.context.fillStyle
     }
     set fillStyle(newValue){
         this.context.fillStyle = newValue
     }
 
     get textBaseline() {
-        return this.context.textBaseline;
+        return this.context.textBaseline
     }
-    set textBaseline(newValue){
+    set textBaseline(newValue) {
         this.context.textBaseline = newValue
+    }
+
+    get textAlign() {
+        return this.context.textAlign
+    }
+    set textAlign(newValue) {
+        this.context.textAlign = newValue
     }
 
     get font() {
@@ -88,7 +97,7 @@ export default class CGContext {
 
     fillText(text, px, py, maxWidth=9999) {
         const [x, y] = this.convertPoint(new Point(px, py))
-        this.context.textBaseline = "top"
+        this.context.textBaseline = this.textBaseline
         this.context.fillText(text, x, y, maxWidth);
     }
 

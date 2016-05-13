@@ -97,7 +97,6 @@ var RootView = function (_View) {
 
         var view = new _View3.default(0, 100, 40, 200);
         view.backgroundColor = "blue";
-        view.clipToBounds = true;
         view.addSubview(label);
         _this.addSubview(view);
 
@@ -113,12 +112,12 @@ var RootView = function (_View) {
         button.position = new _Geometry.Point(500, 50);
         button.setBackgroundColor("blue", _Button.ControlState.Normal);
         button.setBackgroundColor("red", _Button.ControlState.Highlighted);
+        button.setTitle("按钮", _Button.ControlState.Normal);
         _this.addSubview(button);
         button.target = self;
         button.func = function () {
             console.log("button clicked!!!!!");
         };
-
         return _this;
     }
 
@@ -230,6 +229,8 @@ exports.ControlState = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
 var _Util = require('../util/Util');
 
 var _Geometry = require('./Geometry');
@@ -279,7 +280,12 @@ var Button = function (_View) {
         _this.imageView = new _ImageView2.default();
         _this.addSubview(_this.imageView);
         _this.titleLabel = new _Label2.default();
+        _this.titleLabel.clipToBounds = true;
+        _this.titleLabel.textAlignment = _Label.TextAlignment.Center;
+        _this.titleLabel.verticalAlignment = _Label.VerticalAlignment.Center;
+        _this.titleLabel.size = _this.size.copy();
         _this.addSubview(_this.titleLabel);
+
         _this.func = func;
         _this.target = target;
         _this.images = {};
@@ -296,26 +302,47 @@ var Button = function (_View) {
         key: 'setBackgroundColor',
         value: function setBackgroundColor(color, controlState) {
             this.backgroundColors[controlState] = color;
+            if (controlState == this.controlState) {
+                this.backgroundColor = color;
+            }
         }
     }, {
         key: 'setBackgroundImage',
         value: function setBackgroundImage(image, controlState) {
             this.backgroundImages[controlState] = image;
+            if (controlState == this.controlState) {
+                this.backgroundImageView.image = image;
+            }
         }
     }, {
         key: 'setImage',
         value: function setImage(image, controlState) {
             this.images[controlState] = image;
+            if (controlState == this.controlState) {
+                this.imageView.image = image;
+            }
         }
     }, {
         key: 'setTitleColor',
         value: function setTitleColor(color, controlState) {
             this.titleColors[controlState] = color;
+            if (controlState == this.controlState) {
+                this.titleLabel.textColor = color;
+            }
         }
     }, {
         key: 'setTitle',
         value: function setTitle(title, controlState) {
             this.titles[controlState] = title;
+            if (controlState == this.controlState) {
+                this.titleLabel.text = title;
+            }
+        }
+    }, {
+        key: 'layoutSubviews',
+        value: function layoutSubviews() {
+            _get(Object.getPrototypeOf(Button.prototype), 'layoutSubviews', this).call(this);
+            this.titleLabel.size = this.size.copy();
         }
     }, {
         key: 'mouseDown',
@@ -404,6 +431,8 @@ var CGContext = function () {
 
         this.view = view;
         this._font = _Util.nil;
+        this.textBaseline = "top";
+        this.textAlign = "left";
     }
 
     _createClass(CGContext, [{
@@ -478,7 +507,7 @@ var CGContext = function () {
             var x = _convertPoint6[0];
             var y = _convertPoint6[1];
 
-            this.context.textBaseline = "top";
+            this.context.textBaseline = this.textBaseline;
             this.context.fillText(text, x, y, maxWidth);
         }
     }, {
@@ -567,6 +596,14 @@ var CGContext = function () {
         },
         set: function set(newValue) {
             this.context.textBaseline = newValue;
+        }
+    }, {
+        key: 'textAlign',
+        get: function get() {
+            return this.context.textAlign;
+        },
+        set: function set(newValue) {
+            this.context.textAlign = newValue;
         }
     }, {
         key: 'font',
@@ -929,6 +966,7 @@ var ImageView = function (_View) {
 
         var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(ImageView).call(this));
 
+        _this.userInteractionEnabled = false;
         _this.image = image;
         _this._autoSizing = false;
         _this._equalRatio = EqualRatio.None;
@@ -1034,6 +1072,7 @@ exports.default = ImageView;
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
+exports.VerticalAlignment = exports.TextAlignment = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -1059,6 +1098,18 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
+var TextAlignment = exports.TextAlignment = {
+    Left: 0,
+    Center: 1,
+    Right: 2
+};
+
+var VerticalAlignment = exports.VerticalAlignment = {
+    Top: 0,
+    Center: 1,
+    Bottm: 2
+};
+
 var Label = function (_View) {
     _inherits(Label, _View);
 
@@ -1077,10 +1128,22 @@ var Label = function (_View) {
         _this._text = _Util.nil;
         _this._textColor = "black";
         _this._lineHeight = parseFloat(_this.font);
+        _this._autoSizing = false;
+        _this._textAlignment = TextAlignment.Left; // only support single line label
+        _this._verticalAlignment = TextAlignment.Top; // only support single line label
+        _this.backgroundAlpha = 0;
+        _this.userInteractionEnabled = false;
         return _this;
     }
 
     _createClass(Label, [{
+        key: 'autoResize',
+        value: function autoResize() {
+            if (this.autoSizing) {
+                this.sizeToFit();
+            }
+        }
+    }, {
         key: 'fitSize',
         value: function fitSize() {
             if (!this.text) {
@@ -1104,7 +1167,60 @@ var Label = function (_View) {
             if (this.isMultiLine) {
                 ctx.wrapText(drawingText, 0, 0, this.size.width, this.lineHeight);
             } else {
-                ctx.fillText(drawingText, 0, 0, this.size.width);
+                var x = 0;
+                var y = 0;
+                if (this.verticalAlignment == VerticalAlignment.Center) {
+                    ctx.textBaseline = "middle";
+                    y = this.size.height / 2;
+                } else if (this.verticalAlignment == VerticalAlignment.Bottom) {
+                    ctx.textBaseline = "bottom";
+                    y = this.size.height;
+                }
+
+                if (this.textAlignment == TextAlignment.Center) {
+                    ctx.textAlign = "center";
+                    x = this.size.width / 2;
+                } else if (this.textAlignment == TextAlignment.Right) {
+                    ctx.textAlign = "right";
+                    x = this.size.width;
+                }
+                ctx.fillText(drawingText, x, y, this.size.width);
+            }
+        }
+    }, {
+        key: 'textAlignment',
+        get: function get() {
+            return this._textAlignment;
+        },
+        set: function set(newValue) {
+            if (this._textAlignment != newValue) {
+                this._textAlignment = newValue;
+                this.autoResize();
+                this._checkAndSetNeedsRender();
+            }
+        }
+    }, {
+        key: 'verticalAlignment',
+        get: function get() {
+            return this._verticalAlignment;
+        },
+        set: function set(newValue) {
+            if (this._verticalAlignment != newValue) {
+                this._verticalAlignment = newValue;
+                this.autoResize();
+                this._checkAndSetNeedsRender();
+            }
+        }
+    }, {
+        key: 'autoSizing',
+        get: function get() {
+            return this._autoSizing;
+        },
+        set: function set(newValue) {
+            if (this._autoSizing != newValue) {
+                this._autoSizing = newValue;
+                this.autoResize();
+                this._checkAndSetNeedsRender();
             }
         }
     }, {
@@ -1115,6 +1231,7 @@ var Label = function (_View) {
         set: function set(newValue) {
             if (this._text != newValue) {
                 this._text = newValue;
+                this.autoResize();
                 this._checkAndSetNeedsRender();
             }
         }
@@ -1126,6 +1243,7 @@ var Label = function (_View) {
         set: function set(newValue) {
             if (this._multiLine != newValue) {
                 this._multiLine = newValue;
+                this.autoResize();
                 this._checkAndSetNeedsRender();
             }
         }
@@ -1150,6 +1268,7 @@ var Label = function (_View) {
         set: function set(newValue) {
             if (this._font != newValue) {
                 this._font = newValue;
+                this.autoResize();
                 this._checkAndSetNeedsRender();
             }
         }
@@ -1161,6 +1280,7 @@ var Label = function (_View) {
         set: function set(newValue) {
             if (this._lineHeight != newValue) {
                 this._lineHeight = newValue;
+                this.autoResize();
                 this._checkAndSetNeedsRender();
             }
         }
@@ -1242,6 +1362,7 @@ var View = function (_BaseObject) {
         _this._position = new _Geometry.Point(x, y);
         _this._size = new _Geometry.Size(width, height);
         _this._alpha = 1;
+        _this.backgroundAlpha = 1;
         _this.subviews = new Array();
         _this.autoresizingMask = _Geometry.ViewAutoresizing.None;
         _this.superview = _Util.nil;
@@ -1545,40 +1666,46 @@ var View = function (_BaseObject) {
             if (this.clipToBounds) {
                 ctx.clip({ position: new _Geometry.Point(), size: this.size.copy() }, "nonzero");
             }
-            this.render(ctx);
-            var _iteratorNormalCompletion4 = true;
-            var _didIteratorError4 = false;
-            var _iteratorError4 = undefined;
+            ctx.alpha = ctx.alpha * this.alpha;
+            if (ctx.alpha != 0) {
+                this.render(ctx);
+                var _iteratorNormalCompletion4 = true;
+                var _didIteratorError4 = false;
+                var _iteratorError4 = undefined;
 
-            try {
-                for (var _iterator4 = this.subviews[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
-                    var view = _step4.value;
-
-                    view._render();
-                }
-            } catch (err) {
-                _didIteratorError4 = true;
-                _iteratorError4 = err;
-            } finally {
                 try {
-                    if (!_iteratorNormalCompletion4 && _iterator4.return) {
-                        _iterator4.return();
+                    for (var _iterator4 = this.subviews[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+                        var view = _step4.value;
+
+                        view._render();
                     }
+                } catch (err) {
+                    _didIteratorError4 = true;
+                    _iteratorError4 = err;
                 } finally {
-                    if (_didIteratorError4) {
-                        throw _iteratorError4;
+                    try {
+                        if (!_iteratorNormalCompletion4 && _iterator4.return) {
+                            _iterator4.return();
+                        }
+                    } finally {
+                        if (_didIteratorError4) {
+                            throw _iteratorError4;
+                        }
                     }
                 }
             }
-
             ctx.restore();
         }
     }, {
         key: 'render',
         value: function render(ctx) {
-            ctx.alpha = ctx.alpha * this.alpha;
+            ctx.save();
             ctx.fillStyle = this.backgroundColor;
-            ctx.fillRect(0, 0, this.size.width, this.size.height);
+            ctx.alpha = ctx.alpha * this.backgroundAlpha;
+            if (ctx.alpha != 0) {
+                ctx.fillRect(0, 0, this.size.width, this.size.height);
+            }
+            ctx.restore();
         }
     }, {
         key: 'toString',

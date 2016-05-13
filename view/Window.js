@@ -121,12 +121,11 @@ if (typeof window != 'undefined') {
     function backingScale() {
         if ('devicePixelRatio' in window) {
             if (window.devicePixelRatio > 1) {
-                return window.devicePixelRatio;
+                return window.devicePixelRatio
             }
         }
         return 1;
     }
-
 
     function resizeCanvas() {
 		const w = document.body.offsetWidth,
@@ -184,7 +183,6 @@ if (typeof window != 'undefined') {
         const point = convertTouchPoint(e)
         rootWindow.receiveMouseUp(point)
     }
-
 
     resizeCanvas()
     addTouchListener()
