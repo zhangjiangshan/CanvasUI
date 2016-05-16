@@ -2029,7 +2029,7 @@ var Window = function (_View) {
     }], [{
         key: 'renderHtml',
         value: function renderHtml() {
-            return '<!DOCTYPE html>\n        <head>\n            <title id="title"></title>\n            <style type="text/css">\n\t           html,body { background:#fff; height:100%; margin:0; padding:0; overflow:hidden }\n\t              canvas { position:absolute; top:0; left:0 }\n            </style>\n        </head>\n        <body>\n            <canvas id="canvas"></canvas>\n            <script src="./dist/bundle.js"></script>\n\n        <body>';
+            return '<!DOCTYPE html>\n        <head>\n            <meta name="viewport" content="width=device-width, initial-scale=1"/>  \n            <title id="title"></title>\n            <style type="text/css">\n\t           html,body { background:#fff; height:100%; margin:0; padding:0; overflow:hidden }\n\t              canvas { position:absolute; top:0; left:0 }\n            </style>\n        </head>\n        <body>\n            <canvas id="canvas"></canvas>\n            <script src="./dist/bundle.js"></script>\n\n        <body>';
         }
     }]);
 
