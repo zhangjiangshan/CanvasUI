@@ -31,7 +31,7 @@ var _RootView2 = _interopRequireDefault(_RootView);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"./main/RootView":2,"./util/Array":3,"./util/Util":4,"./view/BaseObject":5,"./view/Geometry":10,"./view/Label":12,"./view/View":14,"./view/Window":15}],2:[function(require,module,exports){
+},{"./main/RootView":2,"./util/Array":3,"./util/Util":4,"./view/BaseObject":6,"./view/Geometry":11,"./view/Label":13,"./view/View":15,"./view/Window":16}],2:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -55,6 +55,8 @@ var _ImageView2 = _interopRequireDefault(_ImageView);
 var _Button = require('../view/Button');
 
 var _Button2 = _interopRequireDefault(_Button);
+
+var _Animator = require('../view/Animator');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -116,6 +118,12 @@ var RootView = function (_View) {
         _this.addSubview(button);
         button.target = self;
         button.func = function () {
+            var animation = new _Animator.AnimatAction(imageView2, "position", new _Geometry.Point(imageView2.x + 30, 200), 5);
+            animation.start();
+            var animation2 = new _Animator.AnimatAction(imageView2, "alpha", 0, 5);
+            animation2.start();
+
+            //imageView2.position = new Point(imageView2.x - 4, 200)
             console.log("button clicked!!!!!");
         };
         return _this;
@@ -126,7 +134,7 @@ var RootView = function (_View) {
 
 exports.default = RootView;
 
-},{"../view/Button":6,"../view/Geometry":10,"../view/ImageView":11,"../view/Label":12,"../view/View":14}],3:[function(require,module,exports){
+},{"../view/Animator":5,"../view/Button":7,"../view/Geometry":11,"../view/ImageView":12,"../view/Label":13,"../view/View":15}],3:[function(require,module,exports){
 "use strict";
 
 Array.prototype.indexOfOld = Array.prototype.indexOf;
@@ -151,6 +159,11 @@ Array.prototype.removeObject = function (object) {
     }
 };
 
+Array.prototype.reverseArray = function () {
+    var array = this.slice();
+    return array.reverse();
+};
+
 },{}],4:[function(require,module,exports){
 
 "use strict";
@@ -173,6 +186,352 @@ function copy(object) {
 }
 
 },{}],5:[function(require,module,exports){
+'use strict';
+"use stirct";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.AnimatAction = exports.ConcurrentAnimationQueue = exports.AnimatElement = exports.AnimationModel = undefined;
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _Drawloop = require('./Drawloop');
+
+var _Util = require('../util/Util');
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var AnimationModel = exports.AnimationModel = false;
+
+var AnimatElement = exports.AnimatElement = function () {
+    function AnimatElement(view, key, to) {
+        var from = arguments.length <= 3 || arguments[3] === undefined ? view[key] : arguments[3];
+
+        _classCallCheck(this, AnimatElement);
+
+        this.view = view;
+        this.key = key;
+        this.to = to;
+        this.from = from;
+        this._progress = 0;
+    }
+
+    _createClass(AnimatElement, [{
+        key: 'progress',
+        get: function get() {
+            return this._progress;
+        },
+        set: function set(newValue) {
+            this._progress = newValue;
+            if (this.view && this.key) {
+                if (newValue == 1) {
+                    this.view[this.key] = this.to;
+                } else {
+                    this.view[this.key] = this.from.add(this.to.minus(this.from).multiply(newValue));
+                }
+            }
+        }
+    }]);
+
+    return AnimatElement;
+}();
+
+var AnimationBase = function () {
+    function AnimationBase() {
+        _classCallCheck(this, AnimationBase);
+
+        this.willStartFunc = _Util.nil;
+        this.didFinishFuncs = _Util.nil;
+        this.isPaused = true;
+    }
+
+    _createClass(AnimationBase, [{
+        key: 'start',
+        value: function start() {
+            this.isPaused = false;
+            if (this.willStartFunc) {
+                this.willStartFunc(this);
+            }
+        }
+    }, {
+        key: 'didFinish',
+        value: function didFinish(complete) {
+            this.isPaused = true;
+            if (this.didFinishFunc) {
+                this.didFinishFunc(this, complete);
+            }
+        }
+    }, {
+        key: 'toEnd',
+        value: function toEnd() {
+            this.didFinish(true);
+        }
+    }]);
+
+    return AnimationBase;
+}();
+
+var ConcurrentAnimationQueue = exports.ConcurrentAnimationQueue = function (_AnimationBase) {
+    _inherits(ConcurrentAnimationQueue, _AnimationBase);
+
+    function ConcurrentAnimationQueue(animations) {
+        _classCallCheck(this, ConcurrentAnimationQueue);
+
+        var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(ConcurrentAnimationQueue).call(this));
+
+        _this.animations = animations;
+        var runningNumber = 0;
+        var _iteratorNormalCompletion = true;
+        var _didIteratorError = false;
+        var _iteratorError = undefined;
+
+        try {
+            for (var _iterator = _this.animations[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                var animation = _step.value;
+
+                animation._willStartFunc = function () {
+                    runningNumber += 1;
+                };
+                animation._didFinishFunc = function () {
+                    runningNumber -= 1;
+                    if (runningNumber == 0) {
+                        _this.didFinish(true);
+                    }
+                };
+            }
+        } catch (err) {
+            _didIteratorError = true;
+            _iteratorError = err;
+        } finally {
+            try {
+                if (!_iteratorNormalCompletion && _iterator.return) {
+                    _iterator.return();
+                }
+            } finally {
+                if (_didIteratorError) {
+                    throw _iteratorError;
+                }
+            }
+        }
+
+        return _this;
+    }
+
+    _createClass(ConcurrentAnimationQueue, [{
+        key: 'toEnd',
+        value: function toEnd() {
+            _get(Object.getPrototypeOf(ConcurrentAnimationQueue.prototype), 'toEnd', this).call(this);
+            var _iteratorNormalCompletion2 = true;
+            var _didIteratorError2 = false;
+            var _iteratorError2 = undefined;
+
+            try {
+                for (var _iterator2 = this.animations[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+                    var animation = _step2.value;
+
+                    animation.toEnd();
+                }
+            } catch (err) {
+                _didIteratorError2 = true;
+                _iteratorError2 = err;
+            } finally {
+                try {
+                    if (!_iteratorNormalCompletion2 && _iterator2.return) {
+                        _iterator2.return();
+                    }
+                } finally {
+                    if (_didIteratorError2) {
+                        throw _iteratorError2;
+                    }
+                }
+            }
+        }
+    }, {
+        key: 'start',
+        value: function start() {
+            if (!this.isPause) {
+                return;
+            }
+            _get(Object.getPrototypeOf(ConcurrentAnimationQueue.prototype), 'start', this).call(this);
+            var _iteratorNormalCompletion3 = true;
+            var _didIteratorError3 = false;
+            var _iteratorError3 = undefined;
+
+            try {
+                for (var _iterator3 = this.animations[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+                    var animation = _step3.value;
+
+                    animation.start();
+                }
+            } catch (err) {
+                _didIteratorError3 = true;
+                _iteratorError3 = err;
+            } finally {
+                try {
+                    if (!_iteratorNormalCompletion3 && _iterator3.return) {
+                        _iterator3.return();
+                    }
+                } finally {
+                    if (_didIteratorError3) {
+                        throw _iteratorError3;
+                    }
+                }
+            }
+        }
+    }]);
+
+    return ConcurrentAnimationQueue;
+}(AnimationBase);
+/*
+export class SerialAnimationQueue extends AnimationBase {
+    constructor(animations) {
+        super()
+        this.animations = animations
+    }
+
+    start() {
+        if (!this.isPaused) {
+            return
+        }
+        super.start()
+        const array = this.animations
+        for (let animation of this.animations) {
+            if (!this.isPaused) {
+                animation.resume()
+            }
+        }
+    }
+}*/
+
+var AnimatAction = exports.AnimatAction = function (_AnimationBase2) {
+    _inherits(AnimatAction, _AnimationBase2);
+
+    function AnimatAction(view, key, to) {
+        var duration = arguments.length <= 3 || arguments[3] === undefined ? 0.3 : arguments[3];
+
+        _classCallCheck(this, AnimatAction);
+
+        var _this2 = _possibleConstructorReturn(this, Object.getPrototypeOf(AnimatAction).call(this));
+
+        var lastActor = view.animations[key];
+        if (lastActor) {
+            lastActor.pause();
+        }
+        view.animations[key] = _this2;
+        _this2.element = new AnimatElement(view, key, to);
+        _this2.progress = 0;
+        _this2.duration = duration;
+        _this2.offset = 0;
+        _this2.space = (1 - _this2.offset) / (duration * 60);
+
+        _this2._willStartFunc = _Util.nil;
+        _this2._didFinishFuncs = _Util.nil;
+        return _this2;
+    }
+
+    _createClass(AnimatAction, [{
+        key: 'start',
+        value: function start() {
+            if (!this.isPaused) {
+                return;
+            }
+            this.progress = this.offset;
+            _get(Object.getPrototypeOf(AnimatAction.prototype), 'start', this).call(this);
+            if (this._willStartFunc) {
+                this._willStartFunc(this);
+            }
+            this.step();
+        }
+    }, {
+        key: 'pause',
+        value: function pause() {
+            this.isPaused = true;
+            this.didFinish(false);
+        }
+    }, {
+        key: 'cancel',
+        value: function cancel() {
+            this.isPaused = true;
+            if (this._didFinishFunc) {
+                this._didFinishFunc(this, false);
+            }
+            _get(Object.getPrototypeOf(AnimatAction.prototype), 'didFinish', this).call(this, false);
+        }
+    }, {
+        key: 'resume',
+        value: function resume() {
+            if (!this.isPaused) {
+                return;
+            }
+            this.isPaused = false;
+            this.step();
+        }
+    }, {
+        key: 'toEnd',
+        value: function toEnd() {
+            this.isPaused = false;
+            this.progess = 1;
+            _get(Object.getPrototypeOf(AnimatAction.prototype), 'toEnd', this).call(this);
+        }
+    }, {
+        key: 'didFinish',
+        value: function didFinish(complete) {
+            if (!complete) {
+                this.element.view[this.element.key] = this.element.to.multiply(this.progress);
+            } else {
+                this.element.view[this.element.key] = this.element.to;
+            }
+            if (this._didFinishFunc) {
+                this._didFinishFunc(this, complete);
+            }
+            _get(Object.getPrototypeOf(AnimatAction.prototype), 'didFinish', this).call(this, complete);
+        }
+    }, {
+        key: 'step',
+        value: function step() {
+            var _this3 = this;
+
+            if (this.isPaused) {
+                return;
+            }
+            this.progress = this.progress + this.space;
+            if (this.progress < 1) {
+                requestAnimationFrame(function (timestamp) {
+                    if (_this3.isPaused) {
+                        return;
+                    }
+                    exports.AnimationModel = AnimationModel = true;
+                    _this3.element.progress = _this3.progress;
+                    _Drawloop.drawloop.forceRender();
+                    exports.AnimationModel = AnimationModel = false;
+                    _this3.step();
+                });
+            } else {
+                requestAnimationFrame(function (timestamp) {
+                    if (_this3.isPaused) {
+                        return;
+                    }
+                    exports.AnimationModel = AnimationModel = true;
+                    _this3.element.progress = 1;
+                    _Drawloop.drawloop.forceRender();
+                    exports.AnimationModel = AnimationModel = false;
+                    _this3.didFinish(true);
+                });
+            }
+        }
+    }]);
+
+    return AnimatAction;
+}(AnimationBase);
+
+},{"../util/Util":4,"./Drawloop":9}],6:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -219,7 +578,7 @@ var BaseObject = function () {
 
 exports.default = BaseObject;
 
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -348,18 +707,18 @@ var Button = function (_View) {
         key: 'mouseDown',
         value: function mouseDown(event) {
             this.controlState = ControlState.Highlighted;
-            console.log('I\'m down ' + this.toString());
+            //console.log(`I'm down ${this.toString()}`)
         }
     }, {
         key: 'mouseMove',
         value: function mouseMove(event) {
-            console.log('I\'m move ' + this.toString());
+            //console.log(`I'm move ${this.toString()}`)
         }
     }, {
         key: 'mouseUp',
         value: function mouseUp(event) {
             this.controlState = ControlState.Normal;
-            console.log('I\'m up ' + this.toString());
+            //console.log(`I'm up ${this.toString()}`)
             if (this.func && this.target) {
                 this.func.apply(this.target, this);
             }
@@ -368,7 +727,7 @@ var Button = function (_View) {
         key: 'mouseCancel',
         value: function mouseCancel(event) {
             this.controlState = ControlState.Normal;
-            console.log('I\'m cancel ' + this.toString());
+            //console.log(`I'm cancel ${this.toString()}`)
         }
     }, {
         key: 'controlState',
@@ -408,7 +767,7 @@ var Button = function (_View) {
 
 exports.default = Button;
 
-},{"../util/Util":4,"./Font":9,"./Geometry":10,"./ImageView":11,"./Label":12,"./View":14}],7:[function(require,module,exports){
+},{"../util/Util":4,"./Font":10,"./Geometry":11,"./ImageView":12,"./Label":13,"./View":15}],8:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -645,7 +1004,7 @@ var CGContext = function () {
 
 exports.default = CGContext;
 
-},{"../util/Util.js":4,"./Geometry":10}],8:[function(require,module,exports){
+},{"../util/Util.js":4,"./Geometry":11}],9:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -708,7 +1067,7 @@ var Drawloop = function () {
 
 var drawloop = exports.drawloop = new Drawloop();
 
-},{"../util/Util.js":4}],9:[function(require,module,exports){
+},{"../util/Util.js":4}],10:[function(require,module,exports){
 "use strict";
 
 /*
@@ -759,7 +1118,7 @@ var Font = function () {
 
 exports.default = Font;
 
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -771,6 +1130,19 @@ var _createClass = function () { function defineProperties(target, props) { for 
 exports.isPointIn = isPointIn;
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+Number.prototype.multiply = function (value) {
+    return this * value;
+};
+Number.prototype.add = function (value) {
+    return this + value;
+};
+Number.prototype.minus = function (value) {
+    return this - value;
+};
+// if (typeof testObj.callableFunction == 'function') {
+//     testObj.callableFunction();
+// }
 
 var Point = exports.Point = function () {
     function Point() {
@@ -797,6 +1169,21 @@ var Point = exports.Point = function () {
         key: "copy",
         value: function copy() {
             return new Point(this.x, this.y);
+        }
+    }, {
+        key: "multiply",
+        value: function multiply(value) {
+            return new Point(this.x.multiply(value), this.y.multiply(value));
+        }
+    }, {
+        key: "add",
+        value: function add(point) {
+            return new Point(this.x.add(point.x), this.y.add(point.y));
+        }
+    }, {
+        key: "minus",
+        value: function minus(point) {
+            return new Point(this.x.minus(point.x), this.y.minus(point.y));
         }
     }], [{
         key: "PointZero",
@@ -833,6 +1220,21 @@ var Size = exports.Size = function () {
         key: "copy",
         value: function copy() {
             return new Size(this.width, this.height);
+        }
+    }, {
+        key: "multiply",
+        value: function multiply(value) {
+            return new Point(this.width.multiply(value), this.height.multiply(value));
+        }
+    }, {
+        key: "add",
+        value: function add(value) {
+            return new Point(this.width.add(value.width), this.height.add(value.height));
+        }
+    }, {
+        key: "minus",
+        value: function minus(value) {
+            return new Point(this.width.minus(value.width), this.height.minus(value.height));
         }
     }]);
 
@@ -918,7 +1320,7 @@ var ViewAutoresizing = exports.ViewAutoresizing = {
     FlexibleBottomMargin: 1 << 5
 };
 
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1066,7 +1468,7 @@ var ImageView = function (_View) {
 
 exports.default = ImageView;
 
-},{"../util/Util":4,"./CGContext":7,"./Geometry":10,"./View":14}],12:[function(require,module,exports){
+},{"../util/Util":4,"./CGContext":8,"./Geometry":11,"./View":15}],13:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1291,7 +1693,7 @@ var Label = function (_View) {
 
 exports.default = Label;
 
-},{"../util/Util":4,"./Font":9,"./Geometry":10,"./View":14}],13:[function(require,module,exports){
+},{"../util/Util":4,"./Font":10,"./Geometry":11,"./View":15}],14:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1314,7 +1716,7 @@ var TouchEvent = function TouchEvent() {
 
 exports.default = TouchEvent;
 
-},{"../util/Util":4}],14:[function(require,module,exports){
+},{"../util/Util":4}],15:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1336,6 +1738,8 @@ var _Geometry = require('./Geometry');
 var _CGContext = require('./CGContext');
 
 var _CGContext2 = _interopRequireDefault(_CGContext);
+
+var _Animator = require('./Animator');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -1369,6 +1773,11 @@ var View = function (_BaseObject) {
         _this.window = _Util.nil;
         _this.userInteractionEnabled = true;
         _this._clipToBounds = false;
+        _this.animations = new Array();
+
+        _this.an_position = _Util.nil;
+        _this.an_size = _Util.nil;
+        _this.an_alpha = _Util.nil;
         return _this;
     }
 
@@ -1463,8 +1872,8 @@ var View = function (_BaseObject) {
                     newSize.height += verticalSpace;
                 }
             }
-            this._position = newPosition;
-            this._size = newSize;
+            this.position = newPosition;
+            this.size = newSize;
         }
     }, {
         key: 'layoutSubviews',
@@ -1619,7 +2028,7 @@ var View = function (_BaseObject) {
                 var _iteratorError3 = undefined;
 
                 try {
-                    for (var _iterator3 = array.reverse()[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+                    for (var _iterator3 = array.reverseArray()[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
                         var value = _step3.value;
 
                         _convertPoint = new _Geometry.Point(_convertPoint.x - value.position.x, _convertPoint.y - value.position.y);
@@ -1641,7 +2050,6 @@ var View = function (_BaseObject) {
 
                 return _convertPoint;
             } else if (this.window !== view.window) {
-                console.log(this.toString() + ' and ' + this.toString() + ' are not on same window');
                 return _Util.nil;
             }
         }
@@ -1724,7 +2132,7 @@ var View = function (_BaseObject) {
             var _iteratorError5 = undefined;
 
             try {
-                for (var _iterator5 = this.subviews.reverse()[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+                for (var _iterator5 = this.subviews.reverseArray()[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
                     var subview = _step5.value;
 
                     if (subview.pointInside(point)) {
@@ -1764,22 +2172,33 @@ var View = function (_BaseObject) {
     }, {
         key: 'mouseDown',
         value: function mouseDown(event) {
-            console.log('I\'m down ' + this.toString());
+            //console.log(`I'm down ${this.toString()}`)
         }
     }, {
         key: 'mouseMove',
         value: function mouseMove(event) {
-            console.log('I\'m move ' + this.toString());
+            //console.log(`I'm move ${this.toString()}`)
         }
     }, {
         key: 'mouseUp',
         value: function mouseUp(event) {
-            console.log('I\'m up ' + this.toString());
+            //console.log(`I'm up ${this.toString()}`)
         }
     }, {
         key: 'mouseCancel',
         value: function mouseCancel(event) {
-            console.log('I\'m cancel ' + this.toString());
+            //console.log(`I'm cancel ${this.toString()}`)
+        }
+    }, {
+        key: 'clipToBounds',
+        get: function get() {
+            return this._clipToBounds;
+        },
+        set: function set(newValue) {
+            if (this._clipToBounds != newValue) {
+                this._clipToBounds = newValue;
+                this._checkAndSetNeedsRender();
+            }
         }
     }, {
         key: 'backgroundColor',
@@ -1795,31 +2214,44 @@ var View = function (_BaseObject) {
     }, {
         key: 'alpha',
         get: function get() {
+            if (_Animator.AnimationModel) {
+                return this.an_alpha || this._alpha;
+            }
             return this._alpha;
         },
         set: function set(newValue) {
+            if (_Animator.AnimationModel) {
+                this.an_alpha = newValue;
+                return;
+            }
+            if (this.animations["alpha"]) {
+                this.animations["alpha"].cancel();
+                delete this.animations["alpha"];
+                this._checkAndSetNeedsRender();
+            }
             if (this._alpha != newValue) {
                 this._alpha = newValue;
                 this._checkAndSetNeedsRender();
             }
         }
     }, {
-        key: 'clipToBounds',
-        get: function get() {
-            return this._clipToBounds;
-        },
-        set: function set(newValue) {
-            if (this._clipToBounds != newValue) {
-                this._clipToBounds = newValue;
-                this._checkAndSetNeedsRender();
-            }
-        }
-    }, {
         key: 'position',
         get: function get() {
+            if (_Animator.AnimationModel) {
+                return this.an_position || this._position;
+            }
             return this._position;
         },
         set: function set(newValue) {
+            if (_Animator.AnimationModel) {
+                this.an_position = newValue;
+                return;
+            }
+            if (this.animations["position"]) {
+                this.animations["position"].cancel();
+                delete this.animations["position"];
+                this._checkAndSetNeedsRender();
+            }
             var newPosition = newValue.round();
             if (this._position != newPosition) {
                 this._position = newPosition;
@@ -1829,9 +2261,21 @@ var View = function (_BaseObject) {
     }, {
         key: 'size',
         get: function get() {
+            if (_Animator.AnimationModel) {
+                return this.an_size || this._size;
+            }
             return this._size;
         },
         set: function set(newValue) {
+            if (_Animator.AnimationModel) {
+                this.an_size = newValue;
+                return;
+            }
+            if (this.animations["size"]) {
+                this.animations["size"].cancel();
+                delete this.animations["size"];
+                this._checkAndSetNeedsRender();
+            }
             var newSize = newValue.round();
             var oldSize = this._size;
             if (oldSize != newSize) {
@@ -1883,7 +2327,7 @@ var View = function (_BaseObject) {
 
 exports.default = View;
 
-},{"../util/Util.js":4,"./BaseObject":5,"./CGContext":7,"./Drawloop":8,"./Geometry":10}],15:[function(require,module,exports){
+},{"../util/Util.js":4,"./Animator":5,"./BaseObject":6,"./CGContext":8,"./Drawloop":9,"./Geometry":11}],16:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2121,4 +2565,4 @@ if (typeof window != 'undefined') {
     })();
 }
 
-},{"../main/RootView":2,"../util/Util":4,"./Drawloop":8,"./Geometry":10,"./TouchEvent":13,"./View":14}]},{},[1]);
+},{"../main/RootView":2,"../util/Util":4,"./Drawloop":9,"./Geometry":11,"./TouchEvent":14,"./View":15}]},{},[1]);

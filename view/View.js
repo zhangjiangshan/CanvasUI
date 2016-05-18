@@ -4,6 +4,7 @@ import {nil, copy} from '../util/Util.js'
 import {drawloop} from './Drawloop'
 import {Point, Size, Edge, ViewAutoresizing, isPointIn} from './Geometry'
 import CGContext from './CGContext'
+import {AnimationModel} from './Animator'
 
 export default class View extends BaseObject {
     constructor(x=0, y=0, width=0, height=0) {
@@ -19,6 +20,21 @@ export default class View extends BaseObject {
         this.window = nil
         this.userInteractionEnabled = true
         this._clipToBounds = false
+        this.animations = new Array()
+
+        this.an_position = nil
+        this.an_size = nil
+        this.an_alpha = nil
+    }
+
+    get clipToBounds() {
+        return this._clipToBounds;
+    }
+    set clipToBounds(newValue){
+        if (this._clipToBounds != newValue) {
+            this._clipToBounds = newValue
+            this._checkAndSetNeedsRender()
+        }
     }
 
     get backgroundColor() {
@@ -32,29 +48,43 @@ export default class View extends BaseObject {
     }
 
     get alpha() {
-        return this._alpha;
+        if (AnimationModel) {
+            return this.an_alpha || this._alpha
+        }
+        return this._alpha
     }
     set alpha(newValue){
+        if (AnimationModel) {
+            this.an_alpha = newValue
+            return
+        }
+        if (this.animations["alpha"]) {
+            this.animations["alpha"].cancel()
+            delete this.animations["alpha"]
+            this._checkAndSetNeedsRender()
+        }
         if (this._alpha != newValue) {
             this._alpha = newValue
             this._checkAndSetNeedsRender()
         }
     }
 
-    get clipToBounds() {
-        return this._clipToBounds;
-    }
-    set clipToBounds(newValue){
-        if (this._clipToBounds != newValue) {
-            this._clipToBounds = newValue
-            this._checkAndSetNeedsRender()
-        }
-    }
-
     get position() {
+        if (AnimationModel) {
+            return this.an_position || this._position
+        }
         return this._position;
     }
-    set position(newValue){
+    set position(newValue) {
+        if (AnimationModel) {
+            this.an_position = newValue
+            return
+        }
+        if (this.animations["position"]) {
+            this.animations["position"].cancel()
+            delete this.animations["position"]
+            this._checkAndSetNeedsRender()
+        }
         const newPosition = newValue.round()
         if (this._position != newPosition) {
             this._position = newPosition
@@ -63,9 +93,21 @@ export default class View extends BaseObject {
     }
 
     get size() {
+        if (AnimationModel) {
+            return this.an_size || this._size
+        }
         return this._size;
     }
     set size(newValue) {
+        if (AnimationModel) {
+            this.an_size = newValue
+            return
+        }
+        if (this.animations["size"]) {
+            this.animations["size"].cancel()
+            delete this.animations["size"]
+            this._checkAndSetNeedsRender()
+        }
         const newSize = newValue.round()
         const oldSize = this._size
         if (oldSize != newSize) {
@@ -172,8 +214,8 @@ export default class View extends BaseObject {
                 newSize.height += verticalSpace
             }
         }
-        this._position = newPosition
-        this._size = newSize
+        this.position = newPosition
+        this.size = newSize
     }
 
     layoutSubviews() {
@@ -294,12 +336,11 @@ export default class View extends BaseObject {
                 next = next.superview
             }
             let convertPoint = point.copy()
-            for (let value of array.reverse()) {
+            for (let value of array.reverseArray()) {
                 convertPoint = new Point(convertPoint.x - value.position.x, convertPoint.y - value.position.y)
             }
             return convertPoint
         } else if (this.window !== view.window) {
-            console.log(`${this.toString()} and ${this.toString()} are not on same window`)
             return nil
         }
     }
@@ -348,7 +389,7 @@ export default class View extends BaseObject {
     // touch
     hitTest(point) {
         let finalView = nil
-        for (let subview of this.subviews.reverse()) {
+        for (let subview of this.subviews.reverseArray()) {
             if (subview.pointInside(point)) {
                 const view = subview.hitTest(this.convertPointToView(point, subview))
                 if (view.userInteractionEnabled == true) {
@@ -369,19 +410,19 @@ export default class View extends BaseObject {
     }
 
     mouseDown(event) {
-        console.log(`I'm down ${this.toString()}`)
+        //console.log(`I'm down ${this.toString()}`)
     }
 
     mouseMove(event) {
-        console.log(`I'm move ${this.toString()}`)
+        //console.log(`I'm move ${this.toString()}`)
     }
 
     mouseUp(event) {
-        console.log(`I'm up ${this.toString()}`)
+        //console.log(`I'm up ${this.toString()}`)
     }
 
     mouseCancel(event) {
-        console.log(`I'm cancel ${this.toString()}`)
+        //console.log(`I'm cancel ${this.toString()}`)
     }
 
 }

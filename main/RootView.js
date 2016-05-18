@@ -4,6 +4,7 @@ import {Point, Size, Edge, ViewAutoresizing} from '../view/Geometry'
 import Label from '../view/Label'
 import ImageView, {EqualRatio} from '../view/ImageView'
 import Button, {ControlState} from '../view/Button'
+import {AnimatAction} from '../view/Animator'
 
 export default class RootView extends View {
     constructor() {
@@ -52,6 +53,12 @@ export default class RootView extends View {
         this.addSubview(button)
         button.target = self
         button.func = () => {
+            const animation = new AnimatAction(imageView2, "position", (new Point(imageView2.x+30, 200)), 5)
+            animation.start()
+            const animation2 = new AnimatAction(imageView2, "alpha", 0, 5)
+            animation2.start()
+
+            //imageView2.position = new Point(imageView2.x - 4, 200)
             console.log("button clicked!!!!!")
         }
     }

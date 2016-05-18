@@ -1,5 +1,17 @@
 "use strict"
 
+Number.prototype.multiply = function(value) {
+    return this * value
+}
+Number.prototype.add = function(value) {
+    return this + value
+}
+Number.prototype.minus = function(value) {
+    return this - value
+}
+ // if (typeof testObj.callableFunction == 'function') {
+ //     testObj.callableFunction();
+ // }
 
 export class Point {
     constructor(x=0, y=0) {
@@ -14,6 +26,15 @@ export class Point {
     }
     copy() {
         return new Point(this.x, this.y)
+    }
+    multiply(value) {
+        return new Point(this.x.multiply(value), this.y.multiply(value))
+    }
+    add (point) {
+        return new Point(this.x.add(point.x), this.y.add(point.y))
+    }
+    minus(point) {
+        return new Point(this.x.minus(point.x), this.y.minus(point.y))
     }
     static PointZero() {
         return new Point()
@@ -34,6 +55,15 @@ export class Size {
     copy() {
         return new Size(this.width, this.height)
     }
+    multiply(value) {
+        return new Point(this.width.multiply(value), this.height.multiply(value))
+    }
+    add (value) {
+        return new Point(this.width.add(value.width), this.height.add(value.height))
+    }
+    minus(value) {
+        return new Point(this.width.minus(value.width), this.height.minus(value.height))
+    }
 }
 
 export class Edge {
@@ -52,6 +82,7 @@ export class Edge {
                         Math.round(this.bottom),
                         Math.round(this.right))
     }
+
 }
 
 export class Frame {
@@ -71,6 +102,7 @@ export class Frame {
     copy() {
         return new Frame(this.origin.x, this.origin.y, this.size.width, this.size.height)
     }
+
 }
 
 export function isPointIn(point, position, size) {

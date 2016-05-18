@@ -110,16 +110,16 @@ export default class Button extends View {
 
     mouseDown(event) {
         this.controlState = ControlState.Highlighted
-        console.log(`I'm down ${this.toString()}`)
+        //console.log(`I'm down ${this.toString()}`)
     }
 
     mouseMove(event) {
-        console.log(`I'm move ${this.toString()}`)
+        //console.log(`I'm move ${this.toString()}`)
     }
 
     mouseUp(event) {
         this.controlState = ControlState.Normal
-        console.log(`I'm up ${this.toString()}`)
+        //console.log(`I'm up ${this.toString()}`)
         if (this.func && this.target) {
             this.func.apply(this.target, this)
         }
@@ -127,6 +127,6 @@ export default class Button extends View {
 
     mouseCancel(event) {
         this.controlState = ControlState.Normal
-        console.log(`I'm cancel ${this.toString()}`)
+        //console.log(`I'm cancel ${this.toString()}`)
     }
 }

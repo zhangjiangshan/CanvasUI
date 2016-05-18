@@ -21,3 +21,8 @@ Array.prototype.removeObject = function(object){
         this.splice(index,1);
     }
 }
+
+Array.prototype.reverseArray = function() {
+    const array = this.slice()
+    return array.reverse()
+}
