@@ -31,7 +31,7 @@ var _RootView2 = _interopRequireDefault(_RootView);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"./main/RootView":2,"./util/Array":3,"./util/Util":4,"./view/BaseObject":6,"./view/Geometry":11,"./view/Label":13,"./view/View":15,"./view/Window":16}],2:[function(require,module,exports){
+},{"./main/RootView":2,"./util/Array":3,"./util/Util":5,"./view/BaseObject":7,"./view/Geometry":12,"./view/Label":14,"./view/View":16,"./view/Window":17}],2:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -109,6 +109,13 @@ var RootView = function (_View) {
         imageView2.backgroundColor = "#8800AA";
         _this.addSubview(imageView2);
 
+        var imageView3 = new _ImageView2.default(image);
+        imageView3.position = new _Geometry.Point(60, 300);
+        imageView3.size = new _Geometry.Size(100, 100);
+        imageView3.equalRatio = _ImageView.EqualRatio.FlexibleWidth;
+        imageView3.backgroundColor = "#8800AA";
+        _this.addSubview(imageView3);
+
         var button = new _Button2.default();
         button.size = new _Geometry.Size(44, 44);
         button.position = new _Geometry.Point(500, 50);
@@ -118,10 +125,12 @@ var RootView = function (_View) {
         _this.addSubview(button);
         button.target = self;
         button.func = function () {
-            var animation = new _Animator.AnimatAction(imageView2, "position", new _Geometry.Point(imageView2.x + 30, 200), 5);
+            var animation = new _Animator.AnimatAction(imageView2, "position", new _Geometry.Point(imageView2.x + 330, 200), 0.5, 3);
             animation.start();
-            var animation2 = new _Animator.AnimatAction(imageView2, "alpha", 0, 5);
-            animation2.start();
+            var animation1 = new _Animator.AnimatAction(imageView3, "position", new _Geometry.Point(imageView3.x + 330, 300), 0.5, 3);
+            animation1.start();
+            // const animation2 = new AnimatAction(imageView, "alpha", 0, 5)
+            // animation2.start()
 
             //imageView2.position = new Point(imageView2.x - 4, 200)
             console.log("button clicked!!!!!");
@@ -134,7 +143,7 @@ var RootView = function (_View) {
 
 exports.default = RootView;
 
-},{"../view/Animator":5,"../view/Button":7,"../view/Geometry":11,"../view/ImageView":12,"../view/Label":13,"../view/View":15}],3:[function(require,module,exports){
+},{"../view/Animator":6,"../view/Button":8,"../view/Geometry":12,"../view/ImageView":13,"../view/Label":14,"../view/View":16}],3:[function(require,module,exports){
 "use strict";
 
 Array.prototype.indexOfOld = Array.prototype.indexOf;
@@ -165,6 +174,192 @@ Array.prototype.reverseArray = function () {
 };
 
 },{}],4:[function(require,module,exports){
+/*
+ * Tween.js
+ * t: current time（当前时间）；
+ * b: beginning value（初始值）；
+ * c: change in value（变化量）；
+ * d: duration（持续时间）。
+ * you can visit 'http://easings.net/zh-cn' to get effect
+*/
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+var Tween = exports.Tween = {
+    Linear: function Linear(t, b, c, d) {
+        return c * t / d + b;
+    },
+    Quad: {
+        easeIn: function easeIn(t, b, c, d) {
+            return c * (t /= d) * t + b;
+        },
+        easeOut: function easeOut(t, b, c, d) {
+            return -c * (t /= d) * (t - 2) + b;
+        },
+        easeInOut: function easeInOut(t, b, c, d) {
+            if ((t /= d / 2) < 1) return c / 2 * t * t + b;
+            return -c / 2 * (--t * (t - 2) - 1) + b;
+        }
+    },
+    Cubic: {
+        easeIn: function easeIn(t, b, c, d) {
+            return c * (t /= d) * t * t + b;
+        },
+        easeOut: function easeOut(t, b, c, d) {
+            return c * ((t = t / d - 1) * t * t + 1) + b;
+        },
+        easeInOut: function easeInOut(t, b, c, d) {
+            if ((t /= d / 2) < 1) return c / 2 * t * t * t + b;
+            return c / 2 * ((t -= 2) * t * t + 2) + b;
+        }
+    },
+    Quart: {
+        easeIn: function easeIn(t, b, c, d) {
+            return c * (t /= d) * t * t * t + b;
+        },
+        easeOut: function easeOut(t, b, c, d) {
+            return -c * ((t = t / d - 1) * t * t * t - 1) + b;
+        },
+        easeInOut: function easeInOut(t, b, c, d) {
+            if ((t /= d / 2) < 1) return c / 2 * t * t * t * t + b;
+            return -c / 2 * ((t -= 2) * t * t * t - 2) + b;
+        }
+    },
+    Quint: {
+        easeIn: function easeIn(t, b, c, d) {
+            return c * (t /= d) * t * t * t * t + b;
+        },
+        easeOut: function easeOut(t, b, c, d) {
+            return c * ((t = t / d - 1) * t * t * t * t + 1) + b;
+        },
+        easeInOut: function easeInOut(t, b, c, d) {
+            if ((t /= d / 2) < 1) return c / 2 * t * t * t * t * t + b;
+            return c / 2 * ((t -= 2) * t * t * t * t + 2) + b;
+        }
+    },
+    Sine: {
+        easeIn: function easeIn(t, b, c, d) {
+            return -c * Math.cos(t / d * (Math.PI / 2)) + c + b;
+        },
+        easeOut: function easeOut(t, b, c, d) {
+            return c * Math.sin(t / d * (Math.PI / 2)) + b;
+        },
+        easeInOut: function easeInOut(t, b, c, d) {
+            return -c / 2 * (Math.cos(Math.PI * t / d) - 1) + b;
+        }
+    },
+    Expo: {
+        easeIn: function easeIn(t, b, c, d) {
+            return t == 0 ? b : c * Math.pow(2, 10 * (t / d - 1)) + b;
+        },
+        easeOut: function easeOut(t, b, c, d) {
+            return t == d ? b + c : c * (-Math.pow(2, -10 * t / d) + 1) + b;
+        },
+        easeInOut: function easeInOut(t, b, c, d) {
+            if (t == 0) return b;
+            if (t == d) return b + c;
+            if ((t /= d / 2) < 1) return c / 2 * Math.pow(2, 10 * (t - 1)) + b;
+            return c / 2 * (-Math.pow(2, -10 * --t) + 2) + b;
+        }
+    },
+    Circ: {
+        easeIn: function easeIn(t, b, c, d) {
+            return -c * (Math.sqrt(1 - (t /= d) * t) - 1) + b;
+        },
+        easeOut: function easeOut(t, b, c, d) {
+            return c * Math.sqrt(1 - (t = t / d - 1) * t) + b;
+        },
+        easeInOut: function easeInOut(t, b, c, d) {
+            if ((t /= d / 2) < 1) return -c / 2 * (Math.sqrt(1 - t * t) - 1) + b;
+            return c / 2 * (Math.sqrt(1 - (t -= 2) * t) + 1) + b;
+        }
+    },
+    Elastic: {
+        easeIn: function easeIn(t, b, c, d, a, p) {
+            var s;
+            if (t == 0) return b;
+            if ((t /= d) == 1) return b + c;
+            if (typeof p == "undefined") p = d * .3;
+            if (!a || a < Math.abs(c)) {
+                s = p / 4;
+                a = c;
+            } else {
+                s = p / (2 * Math.PI) * Math.asin(c / a);
+            }
+            return -(a * Math.pow(2, 10 * (t -= 1)) * Math.sin((t * d - s) * (2 * Math.PI) / p)) + b;
+        },
+        easeOut: function easeOut(t, b, c, d, a, p) {
+            var s;
+            if (t == 0) return b;
+            if ((t /= d) == 1) return b + c;
+            if (typeof p == "undefined") p = d * .3;
+            if (!a || a < Math.abs(c)) {
+                a = c;
+                s = p / 4;
+            } else {
+                s = p / (2 * Math.PI) * Math.asin(c / a);
+            }
+            return a * Math.pow(2, -10 * t) * Math.sin((t * d - s) * (2 * Math.PI) / p) + c + b;
+        },
+        easeInOut: function easeInOut(t, b, c, d, a, p) {
+            var s;
+            if (t == 0) return b;
+            if ((t /= d / 2) == 2) return b + c;
+            if (typeof p == "undefined") p = d * (.3 * 1.5);
+            if (!a || a < Math.abs(c)) {
+                a = c;
+                s = p / 4;
+            } else {
+                s = p / (2 * Math.PI) * Math.asin(c / a);
+            }
+            if (t < 1) return -.5 * (a * Math.pow(2, 10 * (t -= 1)) * Math.sin((t * d - s) * (2 * Math.PI) / p)) + b;
+            return a * Math.pow(2, -10 * (t -= 1)) * Math.sin((t * d - s) * (2 * Math.PI) / p) * .5 + c + b;
+        }
+    },
+    Back: {
+        easeIn: function easeIn(t, b, c, d, s) {
+            if (typeof s == "undefined") s = 1.70158;
+            return c * (t /= d) * t * ((s + 1) * t - s) + b;
+        },
+        easeOut: function easeOut(t, b, c, d, s) {
+            if (typeof s == "undefined") s = 1.70158;
+            return c * ((t = t / d - 1) * t * ((s + 1) * t + s) + 1) + b;
+        },
+        easeInOut: function easeInOut(t, b, c, d, s) {
+            if (typeof s == "undefined") s = 1.70158;
+            if ((t /= d / 2) < 1) return c / 2 * (t * t * (((s *= 1.525) + 1) * t - s)) + b;
+            return c / 2 * ((t -= 2) * t * (((s *= 1.525) + 1) * t + s) + 2) + b;
+        }
+    },
+    Bounce: {
+        easeIn: function easeIn(t, b, c, d) {
+            return c - Tween.Bounce.easeOut(d - t, 0, c, d) + b;
+        },
+        easeOut: function easeOut(t, b, c, d) {
+            if ((t /= d) < 1 / 2.75) {
+                return c * (7.5625 * t * t) + b;
+            } else if (t < 2 / 2.75) {
+                return c * (7.5625 * (t -= 1.5 / 2.75) * t + .75) + b;
+            } else if (t < 2.5 / 2.75) {
+                return c * (7.5625 * (t -= 2.25 / 2.75) * t + .9375) + b;
+            } else {
+                return c * (7.5625 * (t -= 2.625 / 2.75) * t + .984375) + b;
+            }
+        },
+        easeInOut: function easeInOut(t, b, c, d) {
+            if (t < d / 2) {
+                return Tween.Bounce.easeIn(t * 2, 0, c, d) * .5 + b;
+            } else {
+                return Tween.Bounce.easeOut(t * 2 - d, 0, c, d) * .5 + c * .5 + b;
+            }
+        }
+    }
+};
+//Math.tween = Tween;
+
+},{}],5:[function(require,module,exports){
 
 "use strict";
 
@@ -185,14 +380,14 @@ function copy(object) {
     return Object.assign({}, object);
 }
 
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 'use strict';
 "use stirct";
 
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.AnimatAction = exports.ConcurrentAnimationQueue = exports.AnimatElement = exports.AnimationModel = undefined;
+exports.AnimatAction = exports.AnimationCurve = exports.ConcurrentAnimationQueue = exports.AnimatElement = exports.AnimationModel = undefined;
 
 var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
@@ -201,6 +396,8 @@ var _createClass = function () { function defineProperties(target, props) { for 
 var _Drawloop = require('./Drawloop');
 
 var _Util = require('../util/Util');
+
+var _Tween = require('../util/Tween');
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
@@ -410,11 +607,18 @@ export class SerialAnimationQueue extends AnimationBase {
     }
 }*/
 
+var AnimationCurve = exports.AnimationCurve = {
+    Linear: 0,
+    CurveEaseIn: 1,
+    CurveEaseOut: 2,
+    CurveEaseInOut: 3
+};
+
 var AnimatAction = exports.AnimatAction = function (_AnimationBase2) {
     _inherits(AnimatAction, _AnimationBase2);
 
-    function AnimatAction(view, key, to) {
-        var duration = arguments.length <= 3 || arguments[3] === undefined ? 0.3 : arguments[3];
+    function AnimatAction(view, key, to, duration) {
+        var curve = arguments.length <= 4 || arguments[4] === undefined ? AnimationCurve.Linear : arguments[4];
 
         _classCallCheck(this, AnimatAction);
 
@@ -426,11 +630,32 @@ var AnimatAction = exports.AnimatAction = function (_AnimationBase2) {
         }
         view.animations[key] = _this2;
         _this2.element = new AnimatElement(view, key, to);
-        _this2.progress = 0;
         _this2.duration = duration;
-        _this2.offset = 0;
-        _this2.space = (1 - _this2.offset) / (duration * 60);
-
+        _this2.frameNum = duration * 60;
+        _this2.currentFrame = 0;
+        var frames = _this2.frameNum;
+        switch (curve) {
+            case AnimationCurve.CurveEaseIn:
+                _this2.timeFunc = function (x) {
+                    return _Tween.Tween.Linear(x, 0, 1, frames);
+                };
+                break;
+            case AnimationCurve.CurveEaseOut:
+                _this2.timeFunc = function (x) {
+                    return _Tween.Tween.Quad.easeIn(x, 0, 1, frames);
+                };
+                break;
+            case AnimationCurve.CurveEaseInOut:
+                _this2.timeFunc = function (x) {
+                    return _Tween.Tween.Quad.easeOut(x, 0, 1, frames);
+                };
+                break;
+            default:
+                _this2.timeFunc = function (x) {
+                    return _Tween.Tween.Quad.easeInOut(x, 0, 1, frames);
+                };
+                break;
+        }
         _this2._willStartFunc = _Util.nil;
         _this2._didFinishFuncs = _Util.nil;
         return _this2;
@@ -442,7 +667,7 @@ var AnimatAction = exports.AnimatAction = function (_AnimationBase2) {
             if (!this.isPaused) {
                 return;
             }
-            this.progress = this.offset;
+            this.currentFrame = 0;
             _get(Object.getPrototypeOf(AnimatAction.prototype), 'start', this).call(this);
             if (this._willStartFunc) {
                 this._willStartFunc(this);
@@ -477,7 +702,7 @@ var AnimatAction = exports.AnimatAction = function (_AnimationBase2) {
         key: 'toEnd',
         value: function toEnd() {
             this.isPaused = false;
-            this.progess = 1;
+            this.currentFrame = this.frameNum - 1;
             _get(Object.getPrototypeOf(AnimatAction.prototype), 'toEnd', this).call(this);
         }
     }, {
@@ -501,8 +726,8 @@ var AnimatAction = exports.AnimatAction = function (_AnimationBase2) {
             if (this.isPaused) {
                 return;
             }
-            this.progress = this.progress + this.space;
-            if (this.progress < 1) {
+            this.currentFrame += 1;
+            if (this.currentFrame < this.frameNum - 1) {
                 requestAnimationFrame(function (timestamp) {
                     if (_this3.isPaused) {
                         return;
@@ -526,12 +751,17 @@ var AnimatAction = exports.AnimatAction = function (_AnimationBase2) {
                 });
             }
         }
+    }, {
+        key: 'progress',
+        get: function get() {
+            return this.timeFunc(this.currentFrame);
+        }
     }]);
 
     return AnimatAction;
 }(AnimationBase);
 
-},{"../util/Util":4,"./Drawloop":9}],6:[function(require,module,exports){
+},{"../util/Tween":4,"../util/Util":5,"./Drawloop":10}],7:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -578,7 +808,7 @@ var BaseObject = function () {
 
 exports.default = BaseObject;
 
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -767,7 +997,7 @@ var Button = function (_View) {
 
 exports.default = Button;
 
-},{"../util/Util":4,"./Font":10,"./Geometry":11,"./ImageView":12,"./Label":13,"./View":15}],8:[function(require,module,exports){
+},{"../util/Util":5,"./Font":11,"./Geometry":12,"./ImageView":13,"./Label":14,"./View":16}],9:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1004,7 +1234,7 @@ var CGContext = function () {
 
 exports.default = CGContext;
 
-},{"../util/Util.js":4,"./Geometry":11}],9:[function(require,module,exports){
+},{"../util/Util.js":5,"./Geometry":12}],10:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1067,7 +1297,7 @@ var Drawloop = function () {
 
 var drawloop = exports.drawloop = new Drawloop();
 
-},{"../util/Util.js":4}],10:[function(require,module,exports){
+},{"../util/Util.js":5}],11:[function(require,module,exports){
 "use strict";
 
 /*
@@ -1118,7 +1348,7 @@ var Font = function () {
 
 exports.default = Font;
 
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1320,7 +1550,7 @@ var ViewAutoresizing = exports.ViewAutoresizing = {
     FlexibleBottomMargin: 1 << 5
 };
 
-},{}],12:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1468,7 +1698,7 @@ var ImageView = function (_View) {
 
 exports.default = ImageView;
 
-},{"../util/Util":4,"./CGContext":8,"./Geometry":11,"./View":15}],13:[function(require,module,exports){
+},{"../util/Util":5,"./CGContext":9,"./Geometry":12,"./View":16}],14:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1693,7 +1923,7 @@ var Label = function (_View) {
 
 exports.default = Label;
 
-},{"../util/Util":4,"./Font":10,"./Geometry":11,"./View":15}],14:[function(require,module,exports){
+},{"../util/Util":5,"./Font":11,"./Geometry":12,"./View":16}],15:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1716,7 +1946,7 @@ var TouchEvent = function TouchEvent() {
 
 exports.default = TouchEvent;
 
-},{"../util/Util":4}],15:[function(require,module,exports){
+},{"../util/Util":5}],16:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2327,7 +2557,7 @@ var View = function (_BaseObject) {
 
 exports.default = View;
 
-},{"../util/Util.js":4,"./Animator":5,"./BaseObject":6,"./CGContext":8,"./Drawloop":9,"./Geometry":11}],16:[function(require,module,exports){
+},{"../util/Util.js":5,"./Animator":6,"./BaseObject":7,"./CGContext":9,"./Drawloop":10,"./Geometry":12}],17:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2565,4 +2795,4 @@ if (typeof window != 'undefined') {
     })();
 }
 
-},{"../main/RootView":2,"../util/Util":4,"./Drawloop":9,"./Geometry":11,"./TouchEvent":14,"./View":15}]},{},[1]);
+},{"../main/RootView":2,"../util/Util":5,"./Drawloop":10,"./Geometry":12,"./TouchEvent":15,"./View":16}]},{},[1]);

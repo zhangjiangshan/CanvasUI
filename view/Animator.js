@@ -1,6 +1,7 @@
 "use stirct"
 import {drawloop} from './Drawloop'
 import {nil} from '../util/Util'
+import {Tween} from '../util/Tween'
 
 export let AnimationModel = false
 
@@ -110,8 +111,15 @@ export class SerialAnimationQueue extends AnimationBase {
     }
 }*/
 
+export const AnimationCurve = {
+    Linear:             0,
+    CurveEaseIn:        1,
+    CurveEaseOut:       2,
+    CurveEaseInOut:     3
+};
+
 export class AnimatAction extends AnimationBase {
-    constructor(view, key, to, duration=0.3) {
+    constructor(view, key, to, duration, curve=AnimationCurve.Linear) {
         super()
         const lastActor = view.animations[key]
         if (lastActor) {
@@ -119,20 +127,45 @@ export class AnimatAction extends AnimationBase {
         }
         view.animations[key] = this
         this.element = new AnimatElement(view, key, to)
-        this.progress = 0
         this.duration = duration
-        this.offset = 0
-        this.space = (1 - this.offset) / (duration * 60)
-
+        this.frameNum = duration * 60
+        this.currentFrame = 0
+        const frames = this.frameNum
+        switch (curve) {
+            case AnimationCurve.CurveEaseIn:
+                this.timeFunc = (x) => {
+                    return Tween.Linear(x, 0, 1, frames)
+                }
+                break
+            case AnimationCurve.CurveEaseOut:
+                this.timeFunc = (x) => {
+                    return Tween.Quad.easeIn(x, 0, 1, frames)
+                }
+                break
+            case AnimationCurve.CurveEaseInOut:
+                this.timeFunc = (x) => {
+                    return Tween.Quad.easeOut(x, 0, 1, frames)
+                }
+                break
+            default:
+                this.timeFunc = (x) => {
+                    return Tween.Quad.easeInOut(x, 0, 1, frames)
+                }
+                break
+        }
         this._willStartFunc = nil
         this._didFinishFuncs = nil
+    }
+
+    get progress() {
+        return this.timeFunc(this.currentFrame)
     }
 
     start() {
         if (!this.isPaused) {
             return
         }
-        this.progress = this.offset
+        this.currentFrame = 0
         super.start()
         if (this._willStartFunc) {
             this._willStartFunc(this)
@@ -163,7 +196,7 @@ export class AnimatAction extends AnimationBase {
 
     toEnd() {
         this.isPaused = false
-        this.progess = 1
+        this.currentFrame = this.frameNum - 1
         super.toEnd()
     }
 
@@ -183,8 +216,8 @@ export class AnimatAction extends AnimationBase {
         if (this.isPaused) {
             return
         }
-        this.progress = this.progress + this.space
-        if (this.progress < 1) {
+        this.currentFrame += 1
+        if (this.currentFrame < this.frameNum - 1) {
             requestAnimationFrame((timestamp) => {
                 if (this.isPaused) {
                     return

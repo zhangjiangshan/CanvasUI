@@ -44,6 +44,13 @@ export default class RootView extends View {
         imageView2.backgroundColor = "#8800AA"
         this.addSubview(imageView2)
 
+        const imageView3 = new ImageView(image)
+        imageView3.position = new Point(60, 300)
+        imageView3.size = new Size(100, 100)
+        imageView3.equalRatio = EqualRatio.FlexibleWidth
+        imageView3.backgroundColor = "#8800AA"
+        this.addSubview(imageView3)
+
         const button = new Button()
         button.size = new Size(44,44)
         button.position = new Point(500, 50)
@@ -53,10 +60,12 @@ export default class RootView extends View {
         this.addSubview(button)
         button.target = self
         button.func = () => {
-            const animation = new AnimatAction(imageView2, "position", (new Point(imageView2.x+30, 200)), 5)
+            const animation = new AnimatAction(imageView2, "position", (new Point(imageView2.x+330, 200)), 0.5, 3)
             animation.start()
-            const animation2 = new AnimatAction(imageView2, "alpha", 0, 5)
-            animation2.start()
+            const animation1 = new AnimatAction(imageView3, "position", (new Point(imageView3.x+330, 300)), 0.5, 3)
+            animation1.start()
+            // const animation2 = new AnimatAction(imageView, "alpha", 0, 5)
+            // animation2.start()
 
             //imageView2.position = new Point(imageView2.x - 4, 200)
             console.log("button clicked!!!!!")
