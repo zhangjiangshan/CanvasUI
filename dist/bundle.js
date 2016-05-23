@@ -5,33 +5,13 @@ var _Array = require("./util/Array");
 
 var _Array2 = _interopRequireDefault(_Array);
 
-var _Util = require("./util/Util");
-
-var _Geometry = require("./view/Geometry");
-
-var _BaseObject = require("./view/BaseObject");
-
-var _BaseObject2 = _interopRequireDefault(_BaseObject);
-
-var _View = require("./view/View");
-
-var _View2 = _interopRequireDefault(_View);
-
 var _Window = require("./view/Window");
 
 var _Window2 = _interopRequireDefault(_Window);
 
-var _Label = require("./view/Label");
-
-var _Label2 = _interopRequireDefault(_Label);
-
-var _RootView = require("./main/RootView");
-
-var _RootView2 = _interopRequireDefault(_RootView);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"./main/RootView":2,"./util/Array":3,"./util/Util":5,"./view/BaseObject":7,"./view/Geometry":12,"./view/Label":14,"./view/View":16,"./view/Window":17}],2:[function(require,module,exports){
+},{"./util/Array":3,"./view/Window":17}],2:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -126,9 +106,9 @@ var RootView = function (_View) {
         button.target = self;
         button.func = function () {
             var animation = new _Animator.AnimatAction(imageView2, "position", new _Geometry.Point(imageView2.x + 330, 200), 0.5, 3);
-            animation.start();
             var animation1 = new _Animator.AnimatAction(imageView3, "position", new _Geometry.Point(imageView3.x + 330, 300), 0.5, 3);
-            animation1.start();
+            var queue = new _Animator.SerialAnimationQueue([animation, animation1]);
+            queue.start();
             // const animation2 = new AnimatAction(imageView, "alpha", 0, 5)
             // animation2.start()
 
@@ -387,7 +367,7 @@ function copy(object) {
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.AnimatAction = exports.AnimationCurve = exports.ConcurrentAnimationQueue = exports.AnimatElement = exports.AnimationModel = undefined;
+exports.AnimatAction = exports.AnimationCurve = exports.SerialAnimationQueue = exports.ConcurrentAnimationQueue = exports.AnimatElement = exports.AnimationModel = undefined;
 
 var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
@@ -446,6 +426,8 @@ var AnimationBase = function () {
 
         this.willStartFunc = _Util.nil;
         this.didFinishFuncs = _Util.nil;
+        this._willStartFunc = _Util.nil;
+        this._didFinishFunc = _Util.nil;
         this.isPaused = true;
     }
 
@@ -456,11 +438,17 @@ var AnimationBase = function () {
             if (this.willStartFunc) {
                 this.willStartFunc(this);
             }
+            if (this._willStartFunc) {
+                this._willStartFunc(this);
+            }
         }
     }, {
         key: 'didFinish',
         value: function didFinish(complete) {
             this.isPaused = true;
+            if (this._didFinishFunc) {
+                this._didFinishFunc(this, complete);
+            }
             if (this.didFinishFunc) {
                 this.didFinishFunc(this, complete);
             }
@@ -483,7 +471,7 @@ var ConcurrentAnimationQueue = exports.ConcurrentAnimationQueue = function (_Ani
 
         var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(ConcurrentAnimationQueue).call(this));
 
-        _this.animations = animations;
+        _this.animations = animations.slice();
         var runningNumber = 0;
         var _iteratorNormalCompletion = true;
         var _didIteratorError = false;
@@ -553,7 +541,7 @@ var ConcurrentAnimationQueue = exports.ConcurrentAnimationQueue = function (_Ani
     }, {
         key: 'start',
         value: function start() {
-            if (!this.isPause) {
+            if (!this.isPaused) {
                 return;
             }
             _get(Object.getPrototypeOf(ConcurrentAnimationQueue.prototype), 'start', this).call(this);
@@ -586,6 +574,96 @@ var ConcurrentAnimationQueue = exports.ConcurrentAnimationQueue = function (_Ani
 
     return ConcurrentAnimationQueue;
 }(AnimationBase);
+
+var SerialAnimationQueue = exports.SerialAnimationQueue = function (_AnimationBase2) {
+    _inherits(SerialAnimationQueue, _AnimationBase2);
+
+    function SerialAnimationQueue(animations) {
+        _classCallCheck(this, SerialAnimationQueue);
+
+        var _this2 = _possibleConstructorReturn(this, Object.getPrototypeOf(SerialAnimationQueue).call(this));
+
+        _this2.animations = animations;
+        _this2.runningNumber = 0;
+        var _iteratorNormalCompletion4 = true;
+        var _didIteratorError4 = false;
+        var _iteratorError4 = undefined;
+
+        try {
+            for (var _iterator4 = _this2.animations[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+                var animation = _step4.value;
+
+                animation._didFinishFunc = function () {
+                    _this2.runningNumber += 1;
+                    if (_this2.runningNumber == _this2.animations.count) {
+                        _this2.didFinish(true);
+                    } else {
+                        _this2.nextAnimation();
+                    }
+                };
+            }
+        } catch (err) {
+            _didIteratorError4 = true;
+            _iteratorError4 = err;
+        } finally {
+            try {
+                if (!_iteratorNormalCompletion4 && _iterator4.return) {
+                    _iterator4.return();
+                }
+            } finally {
+                if (_didIteratorError4) {
+                    throw _iteratorError4;
+                }
+            }
+        }
+
+        _this2.nextAnimation();
+        return _this2;
+    }
+
+    _createClass(SerialAnimationQueue, [{
+        key: 'nextAnimation',
+        value: function nextAnimation() {
+            if (this.runningNumber >= this.animations.length) {
+                return;
+            }
+            var animation = this.animations[this.runningNumber];
+            animation.start();
+        }
+    }, {
+        key: 'toEnd',
+        value: function toEnd() {
+            this.runningNumber = this.animations.length;
+            _get(Object.getPrototypeOf(SerialAnimationQueue.prototype), 'toEnd', this).call(this);
+            var _iteratorNormalCompletion5 = true;
+            var _didIteratorError5 = false;
+            var _iteratorError5 = undefined;
+
+            try {
+                for (var _iterator5 = this.animations[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+                    var animation = _step5.value;
+
+                    animation.toEnd();
+                }
+            } catch (err) {
+                _didIteratorError5 = true;
+                _iteratorError5 = err;
+            } finally {
+                try {
+                    if (!_iteratorNormalCompletion5 && _iterator5.return) {
+                        _iterator5.return();
+                    }
+                } finally {
+                    if (_didIteratorError5) {
+                        throw _iteratorError5;
+                    }
+                }
+            }
+        }
+    }]);
+
+    return SerialAnimationQueue;
+}(AnimationBase);
 /*
 export class SerialAnimationQueue extends AnimationBase {
     constructor(animations) {
@@ -614,51 +692,49 @@ var AnimationCurve = exports.AnimationCurve = {
     CurveEaseInOut: 3
 };
 
-var AnimatAction = exports.AnimatAction = function (_AnimationBase2) {
-    _inherits(AnimatAction, _AnimationBase2);
+var AnimatAction = exports.AnimatAction = function (_AnimationBase3) {
+    _inherits(AnimatAction, _AnimationBase3);
 
     function AnimatAction(view, key, to, duration) {
         var curve = arguments.length <= 4 || arguments[4] === undefined ? AnimationCurve.Linear : arguments[4];
 
         _classCallCheck(this, AnimatAction);
 
-        var _this2 = _possibleConstructorReturn(this, Object.getPrototypeOf(AnimatAction).call(this));
+        var _this3 = _possibleConstructorReturn(this, Object.getPrototypeOf(AnimatAction).call(this));
 
         var lastActor = view.animations[key];
         if (lastActor) {
             lastActor.pause();
         }
-        view.animations[key] = _this2;
-        _this2.element = new AnimatElement(view, key, to);
-        _this2.duration = duration;
-        _this2.frameNum = duration * 60;
-        _this2.currentFrame = 0;
-        var frames = _this2.frameNum;
+        view.animations[key] = _this3;
+        _this3.element = new AnimatElement(view, key, to);
+        _this3.duration = duration;
+        _this3.frameNum = duration * 60;
+        _this3.currentFrame = 0;
+        var frames = _this3.frameNum;
         switch (curve) {
             case AnimationCurve.CurveEaseIn:
-                _this2.timeFunc = function (x) {
+                _this3.timeFunc = function (x) {
                     return _Tween.Tween.Linear(x, 0, 1, frames);
                 };
                 break;
             case AnimationCurve.CurveEaseOut:
-                _this2.timeFunc = function (x) {
+                _this3.timeFunc = function (x) {
                     return _Tween.Tween.Quad.easeIn(x, 0, 1, frames);
                 };
                 break;
             case AnimationCurve.CurveEaseInOut:
-                _this2.timeFunc = function (x) {
+                _this3.timeFunc = function (x) {
                     return _Tween.Tween.Quad.easeOut(x, 0, 1, frames);
                 };
                 break;
             default:
-                _this2.timeFunc = function (x) {
+                _this3.timeFunc = function (x) {
                     return _Tween.Tween.Quad.easeInOut(x, 0, 1, frames);
                 };
                 break;
         }
-        _this2._willStartFunc = _Util.nil;
-        _this2._didFinishFuncs = _Util.nil;
-        return _this2;
+        return _this3;
     }
 
     _createClass(AnimatAction, [{
@@ -669,9 +745,6 @@ var AnimatAction = exports.AnimatAction = function (_AnimationBase2) {
             }
             this.currentFrame = 0;
             _get(Object.getPrototypeOf(AnimatAction.prototype), 'start', this).call(this);
-            if (this._willStartFunc) {
-                this._willStartFunc(this);
-            }
             this.step();
         }
     }, {
@@ -684,9 +757,6 @@ var AnimatAction = exports.AnimatAction = function (_AnimationBase2) {
         key: 'cancel',
         value: function cancel() {
             this.isPaused = true;
-            if (this._didFinishFunc) {
-                this._didFinishFunc(this, false);
-            }
             _get(Object.getPrototypeOf(AnimatAction.prototype), 'didFinish', this).call(this, false);
         }
     }, {
@@ -713,15 +783,12 @@ var AnimatAction = exports.AnimatAction = function (_AnimationBase2) {
             } else {
                 this.element.view[this.element.key] = this.element.to;
             }
-            if (this._didFinishFunc) {
-                this._didFinishFunc(this, complete);
-            }
             _get(Object.getPrototypeOf(AnimatAction.prototype), 'didFinish', this).call(this, complete);
         }
     }, {
         key: 'step',
         value: function step() {
-            var _this3 = this;
+            var _this4 = this;
 
             if (this.isPaused) {
                 return;
@@ -729,25 +796,25 @@ var AnimatAction = exports.AnimatAction = function (_AnimationBase2) {
             this.currentFrame += 1;
             if (this.currentFrame < this.frameNum - 1) {
                 requestAnimationFrame(function (timestamp) {
-                    if (_this3.isPaused) {
+                    if (_this4.isPaused) {
                         return;
                     }
                     exports.AnimationModel = AnimationModel = true;
-                    _this3.element.progress = _this3.progress;
+                    _this4.element.progress = _this4.progress;
                     _Drawloop.drawloop.forceRender();
                     exports.AnimationModel = AnimationModel = false;
-                    _this3.step();
+                    _this4.step();
                 });
             } else {
                 requestAnimationFrame(function (timestamp) {
-                    if (_this3.isPaused) {
+                    if (_this4.isPaused) {
                         return;
                     }
                     exports.AnimationModel = AnimationModel = true;
-                    _this3.element.progress = 1;
+                    _this4.element.progress = 1;
                     _Drawloop.drawloop.forceRender();
                     exports.AnimationModel = AnimationModel = false;
-                    _this3.didFinish(true);
+                    _this4.didFinish(true);
                 });
             }
         }

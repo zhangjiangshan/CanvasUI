@@ -33,6 +33,8 @@ class AnimationBase {
     constructor() {
         this.willStartFunc = nil
         this.didFinishFuncs = nil
+        this._willStartFunc = nil
+        this._didFinishFunc = nil
         this.isPaused = true
     }
 
@@ -41,10 +43,16 @@ class AnimationBase {
         if (this.willStartFunc) {
             this.willStartFunc(this)
         }
+        if (this._willStartFunc) {
+            this._willStartFunc(this)
+        }
     }
 
     didFinish(complete) {
         this.isPaused = true
+        if (this._didFinishFunc) {
+            this._didFinishFunc(this, complete)
+        }
         if (this.didFinishFunc) {
             this.didFinishFunc(this, complete)
         }
@@ -58,7 +66,7 @@ class AnimationBase {
 export class ConcurrentAnimationQueue extends AnimationBase {
     constructor(animations) {
         super()
-        this.animations = animations
+        this.animations = animations.slice()
         let runningNumber = 0
         for (let animation of this.animations) {
             animation._willStartFunc = () => {
@@ -81,12 +89,47 @@ export class ConcurrentAnimationQueue extends AnimationBase {
     }
 
     start() {
-        if (!this.isPause) {
+        if (!this.isPaused) {
             return
         }
         super.start()
         for (let animation of this.animations) {
             animation.start()
+        }
+    }
+}
+
+export class SerialAnimationQueue extends AnimationBase {
+    constructor(animations) {
+        super()
+        this.animations = animations
+        this.runningNumber = 0
+        for (let animation of this.animations) {
+            animation._didFinishFunc = () => {
+                this.runningNumber  += 1
+                if (this.runningNumber  == this.animations.count) {
+                    this.didFinish(true)
+                } else {
+                    this.nextAnimation()
+                }
+            }
+        }
+        this.nextAnimation()
+    }
+
+    nextAnimation() {
+        if (this.runningNumber  >= this.animations.length) {
+            return
+        }
+        const animation = this.animations[this.runningNumber]
+        animation.start()
+    }
+
+    toEnd() {
+        this.runningNumber = this.animations.length
+        super.toEnd()
+        for (let animation of this.animations) {
+            animation.toEnd()
         }
     }
 }
@@ -153,8 +196,6 @@ export class AnimatAction extends AnimationBase {
                 }
                 break
         }
-        this._willStartFunc = nil
-        this._didFinishFuncs = nil
     }
 
     get progress() {
@@ -167,9 +208,6 @@ export class AnimatAction extends AnimationBase {
         }
         this.currentFrame = 0
         super.start()
-        if (this._willStartFunc) {
-            this._willStartFunc(this)
-        }
         this.step()
     }
 
@@ -180,9 +218,6 @@ export class AnimatAction extends AnimationBase {
 
     cancel() {
         this.isPaused = true
-        if (this._didFinishFunc) {
-            this._didFinishFunc(this, false)
-        }
         super.didFinish(false)
     }
 
@@ -205,9 +240,6 @@ export class AnimatAction extends AnimationBase {
             this.element.view[this.element.key] = this.element.to.multiply(this.progress)
         } else {
             this.element.view[this.element.key] = this.element.to
-        }
-        if (this._didFinishFunc) {
-            this._didFinishFunc(this, complete)
         }
         super.didFinish(complete)
     }

@@ -4,7 +4,7 @@ import {Point, Size, Edge, ViewAutoresizing} from '../view/Geometry'
 import Label from '../view/Label'
 import ImageView, {EqualRatio} from '../view/ImageView'
 import Button, {ControlState} from '../view/Button'
-import {AnimatAction} from '../view/Animator'
+import {AnimatAction, ConcurrentAnimationQueue, SerialAnimationQueue} from '../view/Animator'
 
 export default class RootView extends View {
     constructor() {
@@ -61,9 +61,9 @@ export default class RootView extends View {
         button.target = self
         button.func = () => {
             const animation = new AnimatAction(imageView2, "position", (new Point(imageView2.x+330, 200)), 0.5, 3)
-            animation.start()
             const animation1 = new AnimatAction(imageView3, "position", (new Point(imageView3.x+330, 300)), 0.5, 3)
-            animation1.start()
+            const queue = new SerialAnimationQueue([animation, animation1])
+            queue.start()
             // const animation2 = new AnimatAction(imageView, "alpha", 0, 5)
             // animation2.start()
 
