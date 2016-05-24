@@ -20,11 +20,69 @@ export default class View extends BaseObject {
         this.window = nil
         this.userInteractionEnabled = true
         this._clipToBounds = false
-        this.animations = new Array()
 
+        //boarder && shadow
+        this._boarderColor = nil
+        this._boarderWidth = 0
+
+        this._shadowBlur = 0
+        this._shadowColor = "black"
+        this._shadowOffset = new Point()
+
+        this.animations = new Array()
         this.an_position = nil
         this.an_size = nil
         this.an_alpha = nil
+    }
+
+    get shadowColor() {
+        return this._shadowColor
+    }
+    set shadowColor(newValue) {
+        if (this._shadowColor != newValue) {
+            this._shadowColor = newValue
+            this._checkAndSetNeedsRender()
+        }
+    }
+
+    get shadowBlur() {
+        return this._shadowBlur
+    }
+    set shadowBlur(newValue) {
+        if (this._shadowBlur != newValue) {
+            this._shadowBlur = newValue
+            this._checkAndSetNeedsRender()
+        }
+    }
+
+    get shadowOffset() {
+        return this._shadowOffset
+    }
+    set shadowOffset(newValue) {
+        if (this._shadowOffset != newValue) {
+            this._shadowOffset = newValue
+            this._checkAndSetNeedsRender()
+        }
+    }
+
+    get boarderColor() {
+        return this._boarderColor
+    }
+    set boarderColor(newValue) {
+        if (this._boarderColor != newValue) {
+            this._boarderColor = newValue
+            this._checkAndSetNeedsRender()
+        }
+    }
+
+    get boarderWidth() {
+        return this._boarderWidth
+    }
+    set boarderWidth(newValue) {
+        if (this._boarderWidth != newValue) {
+            this._boarderWidth = newValue
+            this._checkAndSetNeedsRender()
+        }
     }
 
     get clipToBounds() {
@@ -374,10 +432,18 @@ export default class View extends BaseObject {
 
     render(ctx) {
         ctx.save()
-        ctx.fillStyle = this.backgroundColor;
         ctx.alpha = ctx.alpha * this.backgroundAlpha
         if (ctx.alpha != 0) {
+            ctx.shadowColor = this.shadowColor
+            ctx.shadowBlur = this.shadowBlur
+            ctx.shadowOffset = this.shadowOffset
+            ctx.fillStyle = this.backgroundColor;
             ctx.fillRect(0, 0, this.size.width, this.size.height)
+            if (this.boarderWidth != 0) {
+                ctx.strokeStyle = this.boarderColor
+                ctx.lineWidth = this.boarderWidth
+                ctx.strokeRect(0, 0, this.size.width, this.size.height)
+            }
         }
         ctx.restore()
     }

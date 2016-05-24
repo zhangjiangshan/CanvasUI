@@ -54,13 +54,12 @@ var RootView = function (_View) {
 
         var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(RootView).call(this));
 
-        _this.backgroundColor = "red";
-        _this.autoresizingMask = _Geometry.ViewAutoresizing.FlexibleWidth | _Geometry.ViewAutoresizing.FlexibleHeight | _Geometry.ViewAutoresizing.FlexibleLeftMargin;
-        _this.position = new _Geometry.Point(200, 30);
+        _this.backgroundColor = "white";
+        _this.autoresizingMask = _Geometry.ViewAutoresizing.FlexibleWidth | _Geometry.ViewAutoresizing.FlexibleHeight;
+        _this.position = new _Geometry.Point(20, 30);
         console.log("rootView");
 
         var label = new _Label2.default(0, 20, 400, 30);
-        _this.backgroundColor = "white";
         label.text = "Multimodal Learning用于面部表情识别，多模态分别表现为图像数据和标记点数据，使用Multimodal Learning对二者融合的意义在于更全面地表现表情信息以及区分不同模态的数据对表情识别的影响。";
         _this.addSubview(label);
         label.isMultiLine = true;
@@ -94,11 +93,13 @@ var RootView = function (_View) {
         imageView3.size = new _Geometry.Size(100, 100);
         imageView3.equalRatio = _ImageView.EqualRatio.FlexibleWidth;
         imageView3.backgroundColor = "#8800AA";
+        imageView3.boarderWidth = 1;
+        imageView3.shadowBlur = 10;
         _this.addSubview(imageView3);
 
         var button = new _Button2.default();
         button.size = new _Geometry.Size(44, 44);
-        button.position = new _Geometry.Point(500, 50);
+        button.position = new _Geometry.Point(200, 300);
         button.setBackgroundColor("blue", _Button.ControlState.Normal);
         button.setBackgroundColor("red", _Button.ControlState.Highlighted);
         button.setTitle("按钮", _Button.ControlState.Normal);
@@ -1120,18 +1121,30 @@ var CGContext = function () {
             this.context.fillRect(x, y, width, height);
         }
     }, {
-        key: 'wrapText',
-        value: function wrapText(text, px, py, maxWidth) {
-            var lineHeight = arguments.length <= 4 || arguments[4] === undefined ? 26 : arguments[4];
-
-            this.context.textBaseline = "top";
-
+        key: 'strokeRect',
+        value: function strokeRect(px, py, width, height) {
             var _convertPoint3 = this.convertPoint(new _Geometry.Point(px, py));
 
             var _convertPoint4 = _slicedToArray(_convertPoint3, 2);
 
             var x = _convertPoint4[0];
             var y = _convertPoint4[1];
+
+            this.context.strokeRect(x, y, width, height);
+        }
+    }, {
+        key: 'wrapText',
+        value: function wrapText(text, px, py, maxWidth) {
+            var lineHeight = arguments.length <= 4 || arguments[4] === undefined ? 26 : arguments[4];
+
+            this.context.textBaseline = "top";
+
+            var _convertPoint5 = this.convertPoint(new _Geometry.Point(px, py));
+
+            var _convertPoint6 = _slicedToArray(_convertPoint5, 2);
+
+            var x = _convertPoint6[0];
+            var y = _convertPoint6[1];
 
 
             var words = text.split('');
@@ -1156,12 +1169,12 @@ var CGContext = function () {
         value: function fillText(text, px, py) {
             var maxWidth = arguments.length <= 3 || arguments[3] === undefined ? 9999 : arguments[3];
 
-            var _convertPoint5 = this.convertPoint(new _Geometry.Point(px, py));
+            var _convertPoint7 = this.convertPoint(new _Geometry.Point(px, py));
 
-            var _convertPoint6 = _slicedToArray(_convertPoint5, 2);
+            var _convertPoint8 = _slicedToArray(_convertPoint7, 2);
 
-            var x = _convertPoint6[0];
-            var y = _convertPoint6[1];
+            var x = _convertPoint8[0];
+            var y = _convertPoint8[1];
 
             this.context.textBaseline = this.textBaseline;
             this.context.fillText(text, x, y, maxWidth);
@@ -1171,12 +1184,12 @@ var CGContext = function () {
         value: function drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight) {
             var context = this.context;
             if (image.complete) {
-                var _convertPoint7 = this.convertPoint(new _Geometry.Point(dx, dy));
+                var _convertPoint9 = this.convertPoint(new _Geometry.Point(dx, dy));
 
-                var _convertPoint8 = _slicedToArray(_convertPoint7, 2);
+                var _convertPoint10 = _slicedToArray(_convertPoint9, 2);
 
-                var x = _convertPoint8[0];
-                var y = _convertPoint8[1];
+                var x = _convertPoint10[0];
+                var y = _convertPoint10[1];
 
                 context.drawImage(image, sx, sy, sWidth, sHeight, x, y, dWidth, dHeight);
             } else {
@@ -1188,12 +1201,12 @@ var CGContext = function () {
         value: function clip(rect) {
             var rule = arguments.length <= 1 || arguments[1] === undefined ? "nonzero" : arguments[1];
 
-            var _convertPoint9 = this.convertPoint(rect.position);
+            var _convertPoint11 = this.convertPoint(rect.position);
 
-            var _convertPoint10 = _slicedToArray(_convertPoint9, 2);
+            var _convertPoint12 = _slicedToArray(_convertPoint11, 2);
 
-            var x = _convertPoint10[0];
-            var y = _convertPoint10[1];
+            var x = _convertPoint12[0];
+            var y = _convertPoint12[1];
 
             this.context.rect(x, y, rect.size.width, rect.size.height);
             this.context.clip(rule);
@@ -1274,6 +1287,47 @@ var CGContext = function () {
                 this._font = newValue.copy();
                 this.context.font = this.font.getFontText();
             }
+        }
+    }, {
+        key: 'lineWidth',
+        get: function get() {
+            return this.context.lineWidth;
+        },
+        set: function set(newValue) {
+            this.context.lineWidth = newValue;
+        }
+    }, {
+        key: 'strokeStyle',
+        get: function get() {
+            return this.context.strokeStyle;
+        },
+        set: function set(newValue) {
+            this.context.strokeStyle = newValue;
+        }
+    }, {
+        key: 'shadowColor',
+        get: function get() {
+            return this.context.shadowColor;
+        },
+        set: function set(newValue) {
+            this.context.shadowColor = newValue;
+        }
+    }, {
+        key: 'shadowBlur',
+        get: function get() {
+            return this.context.shadowBlur;
+        },
+        set: function set(newValue) {
+            this.context.shadowBlur = newValue;
+        }
+    }, {
+        key: 'shadowOffset',
+        get: function get() {
+            return new _Geometry.Point(this.context.shadowOffsetX, this.context.shadowOffsetY);
+        },
+        set: function set(newValue) {
+            this.context.shadowOffsetX = newValue.x;
+            this.context.shadowOffsetY = newValue.y;
         }
     }], [{
         key: 'createImage',
@@ -2070,8 +2124,16 @@ var View = function (_BaseObject) {
         _this.window = _Util.nil;
         _this.userInteractionEnabled = true;
         _this._clipToBounds = false;
-        _this.animations = new Array();
 
+        //boarder && shadow
+        _this._boarderColor = _Util.nil;
+        _this._boarderWidth = 0;
+
+        _this._shadowBlur = 0;
+        _this._shadowColor = "black";
+        _this._shadowOffset = new _Geometry.Point();
+
+        _this.animations = new Array();
         _this.an_position = _Util.nil;
         _this.an_size = _Util.nil;
         _this.an_alpha = _Util.nil;
@@ -2405,10 +2467,18 @@ var View = function (_BaseObject) {
         key: 'render',
         value: function render(ctx) {
             ctx.save();
-            ctx.fillStyle = this.backgroundColor;
             ctx.alpha = ctx.alpha * this.backgroundAlpha;
             if (ctx.alpha != 0) {
+                ctx.shadowColor = this.shadowColor;
+                ctx.shadowBlur = this.shadowBlur;
+                ctx.shadowOffset = this.shadowOffset;
+                ctx.fillStyle = this.backgroundColor;
                 ctx.fillRect(0, 0, this.size.width, this.size.height);
+                if (this.boarderWidth != 0) {
+                    ctx.strokeStyle = this.boarderColor;
+                    ctx.lineWidth = this.boarderWidth;
+                    ctx.strokeRect(0, 0, this.size.width, this.size.height);
+                }
             }
             ctx.restore();
         }
@@ -2485,6 +2555,61 @@ var View = function (_BaseObject) {
         key: 'mouseCancel',
         value: function mouseCancel(event) {
             //console.log(`I'm cancel ${this.toString()}`)
+        }
+    }, {
+        key: 'shadowColor',
+        get: function get() {
+            return this._shadowColor;
+        },
+        set: function set(newValue) {
+            if (this._shadowColor != newValue) {
+                this._shadowColor = newValue;
+                this._checkAndSetNeedsRender();
+            }
+        }
+    }, {
+        key: 'shadowBlur',
+        get: function get() {
+            return this._shadowBlur;
+        },
+        set: function set(newValue) {
+            if (this._shadowBlur != newValue) {
+                this._shadowBlur = newValue;
+                this._checkAndSetNeedsRender();
+            }
+        }
+    }, {
+        key: 'shadowOffset',
+        get: function get() {
+            return this._shadowOffset;
+        },
+        set: function set(newValue) {
+            if (this._shadowOffset != newValue) {
+                this._shadowOffset = newValue;
+                this._checkAndSetNeedsRender();
+            }
+        }
+    }, {
+        key: 'boarderColor',
+        get: function get() {
+            return this._boarderColor;
+        },
+        set: function set(newValue) {
+            if (this._boarderColor != newValue) {
+                this._boarderColor = newValue;
+                this._checkAndSetNeedsRender();
+            }
+        }
+    }, {
+        key: 'boarderWidth',
+        get: function get() {
+            return this._boarderWidth;
+        },
+        set: function set(newValue) {
+            if (this._boarderWidth != newValue) {
+                this._boarderWidth = newValue;
+                this._checkAndSetNeedsRender();
+            }
         }
     }, {
         key: 'clipToBounds',

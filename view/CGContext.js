@@ -55,6 +55,43 @@ export default class CGContext {
         }
     }
 
+    get lineWidth() {
+        return this.context.lineWidth
+    }
+    set lineWidth(newValue) {
+        this.context.lineWidth = newValue
+    }
+
+    get strokeStyle() {
+        return this.context.strokeStyle
+    }
+    set strokeStyle(newValue) {
+        this.context.strokeStyle = newValue
+    }
+
+    get shadowColor() {
+        return this.context.shadowColor
+    }
+    set shadowColor(newValue) {
+        this.context.shadowColor = newValue
+    }
+
+    get shadowBlur() {
+        return this.context.shadowBlur
+    }
+    set shadowBlur(newValue) {
+        this.context.shadowBlur = newValue
+    }
+
+    get shadowOffset() {
+        return new Point(this.context.shadowOffsetX, this.context.shadowOffsetY)
+    }
+    set shadowOffset(newValue) {
+        this.context.shadowOffsetX = newValue.x
+        this.context.shadowOffsetY = newValue.y
+    }
+
+
     save() {
         this.context.save()
     }
@@ -71,6 +108,11 @@ export default class CGContext {
     fillRect(px, py, width, height) {
         const [x, y] = this.convertPoint(new Point(px, py))
         this.context.fillRect(x, y, width, height);
+    }
+
+    strokeRect(px, py, width, height) {
+        const [x, y] = this.convertPoint(new Point(px, py))
+        this.context.strokeRect(x, y, width, height);
     }
 
     wrapText(text, px, py, maxWidth, lineHeight=26) {
@@ -139,6 +181,8 @@ export default class CGContext {
         const width = ((y == 0) ? this.measureText(text) : maxWidth)
         return new Size(width, y + lineHeight)
     }
+
+
 
     static createImage(width, height, drawFunc) {
         var canvas = document.createElement(uuid.v1());
