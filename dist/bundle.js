@@ -56,10 +56,9 @@ var RootView = function (_View) {
 
         _this.backgroundColor = "white";
         _this.autoresizingMask = _Geometry.ViewAutoresizing.FlexibleWidth | _Geometry.ViewAutoresizing.FlexibleHeight;
-        _this.position = new _Geometry.Point(20, 30);
         console.log("rootView");
 
-        var label = new _Label2.default(0, 20, 400, 30);
+        var label = new _Label2.default(0, 20, 400, 90);
         label.text = "Multimodal Learning用于面部表情识别，多模态分别表现为图像数据和标记点数据，使用Multimodal Learning对二者融合的意义在于更全面地表现表情信息以及区分不同模态的数据对表情识别的影响。";
         _this.addSubview(label);
         label.isMultiLine = true;
@@ -78,7 +77,7 @@ var RootView = function (_View) {
 
         var view = new _View3.default(0, 100, 40, 200);
         view.backgroundColor = "blue";
-        view.addSubview(label);
+        //view.addSubview(label)
         _this.addSubview(view);
 
         var imageView2 = new _ImageView2.default(image);
@@ -1175,8 +1174,8 @@ var CGContext = function () {
 
             var x = _convertPoint8[0];
             var y = _convertPoint8[1];
+            //this.context.textBaseline = this.textBaseline
 
-            this.context.textBaseline = this.textBaseline;
             this.context.fillText(text, x, y, maxWidth);
         }
     }, {
@@ -1880,7 +1879,7 @@ var Label = function (_View) {
         _this._font = new _Font2.default();
         _this._text = _Util.nil;
         _this._textColor = "black";
-        _this._lineHeight = parseFloat(_this.font);
+        _this._lineHeight = parseFloat(_this.font.fontSize);
         _this._autoSizing = false;
         _this._textAlignment = TextAlignment.Left; // only support single line label
         _this._verticalAlignment = TextAlignment.Top; // only support single line label

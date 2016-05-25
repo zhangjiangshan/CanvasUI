@@ -139,7 +139,7 @@ export default class CGContext {
 
     fillText(text, px, py, maxWidth=9999) {
         const [x, y] = this.convertPoint(new Point(px, py))
-        this.context.textBaseline = this.textBaseline
+        //this.context.textBaseline = this.textBaseline
         this.context.fillText(text, x, y, maxWidth);
     }
 

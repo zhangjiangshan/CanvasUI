@@ -25,7 +25,7 @@ export default class Label extends View {
         this._font = new Font()
         this._text = nil
         this._textColor = "black"
-        this._lineHeight = parseFloat(this.font)
+        this._lineHeight = parseFloat(this.font.fontSize)
         this._autoSizing = false
         this._textAlignment = TextAlignment.Left   // only support single line label
         this._verticalAlignment = TextAlignment.Top // only support single line label

@@ -11,10 +11,9 @@ export default class RootView extends View {
         super()
         this.backgroundColor  = "white"
         this.autoresizingMask = ViewAutoresizing.FlexibleWidth | ViewAutoresizing.FlexibleHeight
-        this.position = new Point(20, 30)
         console.log("rootView")
 
-        const label = new Label(0, 20, 400, 30)
+        const label = new Label(0, 20, 400, 90)
         label.text = "Multimodal Learning用于面部表情识别，多模态分别表现为图像数据和标记点数据，使用Multimodal Learning对二者融合的意义在于更全面地表现表情信息以及区分不同模态的数据对表情识别的影响。"
         this.addSubview(label)
         label.isMultiLine = true
@@ -33,7 +32,7 @@ export default class RootView extends View {
 
         const view = new View(0, 100, 40, 200)
         view.backgroundColor = "blue"
-        view.addSubview(label)
+        //view.addSubview(label)
         this.addSubview(view)
 
         const imageView2 = new ImageView(image)
