@@ -35,7 +35,7 @@ Open `main/RootView` to add some code here
 * scrollView
 * textField
 * navigationController
-* work in mobile browser(It )
+* full support mobile browser
 
 ###Not Support
 * use any css or html(`dom` is evil)

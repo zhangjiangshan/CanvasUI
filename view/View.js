@@ -10,6 +10,7 @@ export default class View extends BaseObject {
     constructor(x=0, y=0, width=0, height=0) {
         super()
         this._backgroundColor = "#00a488"
+        this._offset = new Point()
         this._position = new Point(x, y)
         this._size = new Size(width, height)
         this._alpha = 1
@@ -139,13 +140,12 @@ export default class View extends BaseObject {
             return
         }
         if (this.animations["position"]) {
-            this.animations["position"].cancel()
+            this.animations["position"].immediatelyToEnd()
             delete this.animations["position"]
             this._checkAndSetNeedsRender()
         }
-        const newPosition = newValue.round()
-        if (this._position != newPosition) {
-            this._position = newPosition
+        if (this._position != newValue) {
+            this._position = newValue
             this._checkAndSetNeedsRender()
         }
     }
@@ -375,7 +375,7 @@ export default class View extends BaseObject {
         return !!next
     }
 
-    convertPointToView(point, view) {
+    convertPointToView(point, view, offset=true) {
         if (this === view) {
             return point
         } else if (this.isDescendantOfView(view)) {
@@ -383,6 +383,10 @@ export default class View extends BaseObject {
             let convertPoint = point.copy()
             while (next !== view && next !== nil) {
                 convertPoint = new Point(convertPoint.x + next.position.x, convertPoint.y + next.position.y)
+                if (offset) {
+                    convertPoint.x -= next._offset.x
+                    convertPoint.y -= next._offset.y
+                }
                 next = next.superview
             }
             return convertPoint
@@ -396,6 +400,10 @@ export default class View extends BaseObject {
             let convertPoint = point.copy()
             for (let value of array.reverseArray()) {
                 convertPoint = new Point(convertPoint.x - value.position.x, convertPoint.y - value.position.y)
+                if (offset) {
+                    convertPoint.x += next._offset.x
+                    convertPoint.y += next._offset.y
+                }
             }
             return convertPoint
         } else if (this.window !== view.window) {
@@ -413,12 +421,18 @@ export default class View extends BaseObject {
         }
     }
 
+    _checkAndForceRender() {
+        if (this.window !== nil && this.window === drawloop.keyWindow) {
+            drawloop.forceRender()
+        }
+    }
+
     _render() {
         //console.log(`render:${this.toString()}`)
         const ctx = new CGContext(this)
         ctx.save()
         if (this.clipToBounds) {
-            ctx.clip({position:(new Point()), size:this.size.copy()}, "nonzero")
+            ctx.clip({position:(new Point()), size:this.size.copy()}, false)
         }
         ctx.alpha = ctx.alpha * this.alpha
         if (ctx.alpha != 0) {

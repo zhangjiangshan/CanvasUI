@@ -133,26 +133,6 @@ export class SerialAnimationQueue extends AnimationBase {
         }
     }
 }
-/*
-export class SerialAnimationQueue extends AnimationBase {
-    constructor(animations) {
-        super()
-        this.animations = animations
-    }
-
-    start() {
-        if (!this.isPaused) {
-            return
-        }
-        super.start()
-        const array = this.animations
-        for (let animation of this.animations) {
-            if (!this.isPaused) {
-                animation.resume()
-            }
-        }
-    }
-}*/
 
 export const AnimationCurve = {
     Linear:             0,
@@ -218,6 +198,13 @@ export class AnimatAction extends AnimationBase {
 
     cancel() {
         this.isPaused = true
+        super.didFinish(false)
+    }
+
+    immediatelyToEnd() {
+        this.isPaused = true
+        const key = "_" + this.element.key
+        this.element.view[key] = this.element.to
         super.didFinish(false)
     }
 

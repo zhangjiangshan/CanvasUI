@@ -14,6 +14,7 @@ export default class Window extends View {
         this.rootView = nil
         this.firstResponser = this
         this.isDown = false
+        this._lastMoveEvent = nil
     }
 
     render(context) {
@@ -39,6 +40,7 @@ export default class Window extends View {
     }
 
     receiveMouseDown(point) {
+        this._lastMoveEvent = nil
         this.isDown = true
         const p = new Point(point[0], point[1])
         const responser = this.hitTest(p)
@@ -67,7 +69,12 @@ export default class Window extends View {
         event.point = this.convertPointToView(p, event.firstResponser)
         event.windowPoint = p
         event.event = "mouseMove"
+        if (this._lastMoveEvent && this._lastMoveEvent.firstResponser === event.firstResponser) {
+            event.offset = event.point.minus(this._lastMoveEvent.point)
+            console.log(event.offset.y + "")
+        }
         event.firstResponser.mouseMove(event)
+        this._lastMoveEvent = event
     }
 
     receiveMouseUp(point) {
@@ -98,7 +105,7 @@ export default class Window extends View {
     static renderHtml() {
         return `<!DOCTYPE html>
         <head>
-            <meta name="viewport" content="width=device-width, initial-scale=1"/>  
+            <meta name="viewport" content="width=device-width, initial-scale=1"/>
             <title id="title"></title>
             <style type="text/css">
 	           html,body { background:#fff; height:100%; margin:0; padding:0; overflow:hidden }

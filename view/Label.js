@@ -4,8 +4,6 @@ import View from './View'
 import {Point, Size, Edge, ViewAutoresizing} from './Geometry'
 import Font from './Font'
 
-
-
 export const TextAlignment = {
     Left: 0,
     Center: 1,

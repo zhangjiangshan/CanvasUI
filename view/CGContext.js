@@ -91,7 +91,6 @@ export default class CGContext {
         this.context.shadowOffsetY = newValue.y
     }
 
-
     save() {
         this.context.save()
     }
@@ -100,8 +99,8 @@ export default class CGContext {
         this.context.restore()
     }
 
-    convertPoint(point) {
-        const position = this.view.convertPointToView(point, this.view.window)
+    convertPoint(point, offset=true) {
+        const position = this.view.convertPointToView(point, this.view.window, offset)
         return [position.x, position.y]
     }
 
@@ -153,10 +152,10 @@ export default class CGContext {
         }
     }
 
-    clip(rect, rule="nonzero") {
-        const [x, y] = this.convertPoint(rect.position)
+    clip(rect, offset=true) {
+        const [x, y] = this.convertPoint(rect.position, offset)
         this.context.rect(x, y, rect.size.width, rect.size.height)
-        this.context.clip(rule)
+        this.context.clip("nonzero")
     }
 
     measureText(text) {
@@ -181,8 +180,6 @@ export default class CGContext {
         const width = ((y == 0) ? this.measureText(text) : maxWidth)
         return new Size(width, y + lineHeight)
     }
-
-
 
     static createImage(width, height, drawFunc) {
         var canvas = document.createElement(uuid.v1());

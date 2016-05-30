@@ -11,7 +11,7 @@ var _Window2 = _interopRequireDefault(_Window);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"./util/Array":3,"./view/Window":17}],2:[function(require,module,exports){
+},{"./util/Array":3,"./view/Window":18}],2:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -36,6 +36,10 @@ var _Button = require('../view/Button');
 
 var _Button2 = _interopRequireDefault(_Button);
 
+var _ScrollView = require('../view/ScrollView');
+
+var _ScrollView2 = _interopRequireDefault(_ScrollView);
+
 var _Animator = require('../view/Animator');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -58,6 +62,11 @@ var RootView = function (_View) {
         _this.autoresizingMask = _Geometry.ViewAutoresizing.FlexibleWidth | _Geometry.ViewAutoresizing.FlexibleHeight;
         console.log("rootView");
 
+        var scrollView = new _ScrollView2.default(120, 150, 200, 200);
+        scrollView.contentSize = new _Geometry.Size(400, 400);
+        scrollView.backgroundColor = "red";
+        _this.addSubview(scrollView);
+
         var label = new _Label2.default(0, 20, 400, 90);
         label.text = "Multimodal Learning用于面部表情识别，多模态分别表现为图像数据和标记点数据，使用Multimodal Learning对二者融合的意义在于更全面地表现表情信息以及区分不同模态的数据对表情识别的影响。";
         _this.addSubview(label);
@@ -70,25 +79,17 @@ var RootView = function (_View) {
         imageView.size = new _Geometry.Size(100, 100);
         imageView.equalRatio = _ImageView.EqualRatio.FlexibleHeight;
         imageView.backgroundColor = "#8800AA";
-        _this.addSubview(imageView);
-
-        // imageView.addSubview(label)
-        // imageView.clipToBounds = true
-
-        var view = new _View3.default(0, 100, 40, 200);
-        view.backgroundColor = "blue";
-        //view.addSubview(label)
-        _this.addSubview(view);
+        scrollView.addSubview(imageView);
 
         var imageView2 = new _ImageView2.default(image);
-        imageView2.position = new _Geometry.Point(60, 200);
+        imageView2.position = new _Geometry.Point(0, 200);
         imageView2.size = new _Geometry.Size(100, 100);
         imageView2.equalRatio = _ImageView.EqualRatio.FlexibleWidth;
         imageView2.backgroundColor = "#8800AA";
         _this.addSubview(imageView2);
 
         var imageView3 = new _ImageView2.default(image);
-        imageView3.position = new _Geometry.Point(60, 300);
+        imageView3.position = new _Geometry.Point(0, 300);
         imageView3.size = new _Geometry.Size(100, 100);
         imageView3.equalRatio = _ImageView.EqualRatio.FlexibleWidth;
         imageView3.backgroundColor = "#8800AA";
@@ -105,8 +106,8 @@ var RootView = function (_View) {
         _this.addSubview(button);
         button.target = self;
         button.func = function () {
-            var animation = new _Animator.AnimatAction(imageView2, "position", new _Geometry.Point(imageView2.x + 330, 200), 0.5, 3);
-            var animation1 = new _Animator.AnimatAction(imageView3, "position", new _Geometry.Point(imageView3.x + 330, 300), 0.5, 3);
+            var animation = new _Animator.AnimatAction(imageView2, "position", new _Geometry.Point(imageView2.x + 330, 200), 3);
+            var animation1 = new _Animator.AnimatAction(imageView3, "position", new _Geometry.Point(imageView3.x + 330, 300), 3);
             var queue = new _Animator.SerialAnimationQueue([animation, animation1]);
             queue.start();
             // const animation2 = new AnimatAction(imageView, "alpha", 0, 5)
@@ -123,7 +124,7 @@ var RootView = function (_View) {
 
 exports.default = RootView;
 
-},{"../view/Animator":6,"../view/Button":8,"../view/Geometry":12,"../view/ImageView":13,"../view/Label":14,"../view/View":16}],3:[function(require,module,exports){
+},{"../view/Animator":6,"../view/Button":8,"../view/Geometry":12,"../view/ImageView":13,"../view/Label":14,"../view/ScrollView":15,"../view/View":17}],3:[function(require,module,exports){
 "use strict";
 
 Array.prototype.indexOfOld = Array.prototype.indexOf;
@@ -664,26 +665,6 @@ var SerialAnimationQueue = exports.SerialAnimationQueue = function (_AnimationBa
 
     return SerialAnimationQueue;
 }(AnimationBase);
-/*
-export class SerialAnimationQueue extends AnimationBase {
-    constructor(animations) {
-        super()
-        this.animations = animations
-    }
-
-    start() {
-        if (!this.isPaused) {
-            return
-        }
-        super.start()
-        const array = this.animations
-        for (let animation of this.animations) {
-            if (!this.isPaused) {
-                animation.resume()
-            }
-        }
-    }
-}*/
 
 var AnimationCurve = exports.AnimationCurve = {
     Linear: 0,
@@ -757,6 +738,14 @@ var AnimatAction = exports.AnimatAction = function (_AnimationBase3) {
         key: 'cancel',
         value: function cancel() {
             this.isPaused = true;
+            _get(Object.getPrototypeOf(AnimatAction.prototype), 'didFinish', this).call(this, false);
+        }
+    }, {
+        key: 'immediatelyToEnd',
+        value: function immediatelyToEnd() {
+            this.isPaused = true;
+            var key = "_" + this.element.key;
+            this.element.view[key] = this.element.to;
             _get(Object.getPrototypeOf(AnimatAction.prototype), 'didFinish', this).call(this, false);
         }
     }, {
@@ -1064,7 +1053,7 @@ var Button = function (_View) {
 
 exports.default = Button;
 
-},{"../util/Util":5,"./Font":11,"./Geometry":12,"./ImageView":13,"./Label":14,"./View":16}],9:[function(require,module,exports){
+},{"../util/Util":5,"./Font":11,"./Geometry":12,"./ImageView":13,"./Label":14,"./View":17}],9:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1104,7 +1093,9 @@ var CGContext = function () {
     }, {
         key: 'convertPoint',
         value: function convertPoint(point) {
-            var position = this.view.convertPointToView(point, this.view.window);
+            var offset = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
+
+            var position = this.view.convertPointToView(point, this.view.window, offset);
             return [position.x, position.y];
         }
     }, {
@@ -1198,9 +1189,9 @@ var CGContext = function () {
     }, {
         key: 'clip',
         value: function clip(rect) {
-            var rule = arguments.length <= 1 || arguments[1] === undefined ? "nonzero" : arguments[1];
+            var offset = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
 
-            var _convertPoint11 = this.convertPoint(rect.position);
+            var _convertPoint11 = this.convertPoint(rect.position, offset);
 
             var _convertPoint12 = _slicedToArray(_convertPoint11, 2);
 
@@ -1208,7 +1199,7 @@ var CGContext = function () {
             var y = _convertPoint12[1];
 
             this.context.rect(x, y, rect.size.width, rect.size.height);
-            this.context.clip(rule);
+            this.context.clip("nonzero");
         }
     }, {
         key: 'measureText',
@@ -1818,7 +1809,7 @@ var ImageView = function (_View) {
 
 exports.default = ImageView;
 
-},{"../util/Util":5,"./CGContext":9,"./Geometry":12,"./View":16}],14:[function(require,module,exports){
+},{"../util/Util":5,"./CGContext":9,"./Geometry":12,"./View":17}],14:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2043,14 +2034,183 @@ var Label = function (_View) {
 
 exports.default = Label;
 
-},{"../util/Util":5,"./Font":11,"./Geometry":12,"./View":16}],15:[function(require,module,exports){
+},{"../util/Util":5,"./Font":11,"./Geometry":12,"./View":17}],15:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
-var _Util = require("../util/Util");
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _Util = require('../util/Util');
+
+var _View2 = require('./View');
+
+var _View3 = _interopRequireDefault(_View2);
+
+var _Geometry = require('./Geometry');
+
+var _TouchEvent = require('./TouchEvent');
+
+var _TouchEvent2 = _interopRequireDefault(_TouchEvent);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var ScrollView = function (_View) {
+    _inherits(ScrollView, _View);
+
+    function ScrollView() {
+        var x = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+        var y = arguments.length <= 1 || arguments[1] === undefined ? 0 : arguments[1];
+        var width = arguments.length <= 2 || arguments[2] === undefined ? 0 : arguments[2];
+        var height = arguments.length <= 3 || arguments[3] === undefined ? 0 : arguments[3];
+
+        _classCallCheck(this, ScrollView);
+
+        var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(ScrollView).call(this, x, y, width, height));
+
+        _this.offset = new _Geometry.Point(0, 0);
+        _this.contentSize = _this.size;
+        _this._firstResponser = _this;
+        _this.clipToBounds = true;
+        return _this;
+    }
+
+    _createClass(ScrollView, [{
+        key: 'mouseDown',
+        value: function mouseDown(event) {
+            var responser = this.hitTest(event.point);
+            if (responser === this) {
+                return;
+            }
+            this._firstResponser = responser;
+            var newEvent = new _TouchEvent2.default();
+            newEvent.isDown = true;
+            newEvent.firstResponser = responser;
+            newEvent.point = this.convertPointToView(event.point, event.firstResponser);
+            newEvent.windowPoint = event.windowPoint.copy();
+            newEvent.event = "mouseDown";
+            if (newEvent.firstResponser !== this) {
+                newEvent.firstResponser.mouseDown(event);
+            }
+        }
+    }, {
+        key: 'mouseMove',
+        value: function mouseMove(event) {
+            if (!event.isDown) {
+                return;
+            }
+            if (this._firstResponser) {
+                var newEvent = new _TouchEvent2.default();
+                newEvent.isDown = true;
+                newEvent.firstResponser = this._firstResponser;
+                newEvent.point = this.convertPointToView(event.point, event.firstResponser);
+                newEvent.windowPoint = event.windowPoint.copy();
+                newEvent.event = "mouseCancel";
+                newEvent.offset = event.offset;
+                if (newEvent.firstResponser !== this) {
+                    newEvent.firstResponser.mouseCancel(event);
+                }
+                this._firstResponser = _Util.nil;
+            }
+            if (event.offset) {
+                this.contentOffset = new _Geometry.Point(this.contentOffset.x + event.offset.x, this.contentOffset.y + event.offset.y);
+            }
+        }
+    }, {
+        key: 'mouseUp',
+        value: function mouseUp(event) {
+            if (this._firstResponser) {
+                var newEvent = new _TouchEvent2.default();
+                newEvent.isDown = false;
+                newEvent.firstResponser = this._firstResponser;
+                newEvent.point = this.convertPointToView(event.point, event.firstResponser);
+                newEvent.windowPoint = event.windowPoint.copy();
+                newEvent.event = "mouseUp";
+                if (newEvent.firstResponser !== this) {
+                    newEvent.firstResponser.mouseUp(event);
+                }
+                this._firstResponser = _Util.nil;
+            }
+        }
+    }, {
+        key: 'mouseCancel',
+        value: function mouseCancel(event) {
+            if (this._firstResponser) {
+                var newEvent = new _TouchEvent2.default();
+                newEvent.isDown = false;
+                newEvent.firstResponser = this._firstResponser;
+                newEvent.point = this.convertPointToView(event.point, event._firstResponser);
+                newEvent.windowPoint = event.windowPoint.copy();
+                newEvent.event = "mouseCancel";
+                if (newEvent.firstResponser !== this) {
+                    newEvent.firstResponser.mouseCancel(event);
+                }
+                this._firstResponser = _Util.nil;
+            }
+        }
+    }, {
+        key: 'render',
+        value: function render(ctx) {
+            ctx.save();
+            ctx.alpha = ctx.alpha * this.backgroundAlpha;
+            if (ctx.alpha != 0) {
+                ctx.shadowColor = this.shadowColor;
+                ctx.shadowBlur = this.shadowBlur;
+                ctx.shadowOffset = this.shadowOffset;
+                ctx.fillStyle = this.backgroundColor;
+                ctx.fillRect(0, 0, this.contentSize.width, this.contentSize.height);
+                if (this.boarderWidth != 0) {
+                    ctx.strokeStyle = this.boarderColor;
+                    ctx.lineWidth = this.boarderWidth;
+                    ctx.strokeRect(0, 0, this.contentSize.width, this.contentSize.height);
+                }
+            }
+            ctx.restore();
+        }
+    }, {
+        key: 'hitTest',
+        value: function hitTest(point) {
+            return this;
+        }
+    }, {
+        key: 'contentOffset',
+        get: function get() {
+            return this._offset;
+        },
+        set: function set(newValue) {
+            if (this._offset != newValue) {
+                var maxX = this.contentSize.width - this.size.width;
+                var maxY = this.contentSize.height - this.size.height;
+                var value = new _Geometry.Point(Math.min(Math.max(newValue.x, 0), maxX), Math.min(Math.max(newValue.y, 0), maxY));
+                this._offset = value;
+                this._checkAndForceRender();
+            }
+        }
+    }]);
+
+    return ScrollView;
+}(_View3.default);
+
+exports.default = ScrollView;
+
+},{"../util/Util":5,"./Geometry":12,"./TouchEvent":16,"./View":17}],16:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _Util = require('../util/Util');
+
+var _Geometry = require('./Geometry');
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -2062,11 +2222,12 @@ var TouchEvent = function TouchEvent() {
     this.point = _Util.nil;
     this.windowPoint = _Util.nil;
     this.event = _Util.nil;
+    this.offset = new _Geometry.Point();
 };
 
 exports.default = TouchEvent;
 
-},{"../util/Util":5}],16:[function(require,module,exports){
+},{"../util/Util":5,"./Geometry":12}],17:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2113,6 +2274,7 @@ var View = function (_BaseObject) {
         var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(View).call(this));
 
         _this._backgroundColor = "#00a488";
+        _this._offset = new _Geometry.Point();
         _this._position = new _Geometry.Point(x, y);
         _this._size = new _Geometry.Size(width, height);
         _this._alpha = 1;
@@ -2363,6 +2525,8 @@ var View = function (_BaseObject) {
     }, {
         key: 'convertPointToView',
         value: function convertPointToView(point, view) {
+            var offset = arguments.length <= 2 || arguments[2] === undefined ? true : arguments[2];
+
             if (this === view) {
                 return point;
             } else if (this.isDescendantOfView(view)) {
@@ -2370,6 +2534,10 @@ var View = function (_BaseObject) {
                 var convertPoint = point.copy();
                 while (next !== view && next !== _Util.nil) {
                     convertPoint = new _Geometry.Point(convertPoint.x + next.position.x, convertPoint.y + next.position.y);
+                    if (offset) {
+                        convertPoint.x -= next._offset.x;
+                        convertPoint.y -= next._offset.y;
+                    }
                     next = next.superview;
                 }
                 return convertPoint;
@@ -2390,6 +2558,10 @@ var View = function (_BaseObject) {
                         var value = _step3.value;
 
                         _convertPoint = new _Geometry.Point(_convertPoint.x - value.position.x, _convertPoint.y - value.position.y);
+                        if (offset) {
+                            _convertPoint.x += _next._offset.x;
+                            _convertPoint.y += _next._offset.y;
+                        }
                     }
                 } catch (err) {
                     _didIteratorError3 = true;
@@ -2424,13 +2596,20 @@ var View = function (_BaseObject) {
             }
         }
     }, {
+        key: '_checkAndForceRender',
+        value: function _checkAndForceRender() {
+            if (this.window !== _Util.nil && this.window === _Drawloop.drawloop.keyWindow) {
+                _Drawloop.drawloop.forceRender();
+            }
+        }
+    }, {
         key: '_render',
         value: function _render() {
             //console.log(`render:${this.toString()}`)
             var ctx = new _CGContext2.default(this);
             ctx.save();
             if (this.clipToBounds) {
-                ctx.clip({ position: new _Geometry.Point(), size: this.size.copy() }, "nonzero");
+                ctx.clip({ position: new _Geometry.Point(), size: this.size.copy() }, false);
             }
             ctx.alpha = ctx.alpha * this.alpha;
             if (ctx.alpha != 0) {
@@ -2669,13 +2848,12 @@ var View = function (_BaseObject) {
                 return;
             }
             if (this.animations["position"]) {
-                this.animations["position"].cancel();
+                this.animations["position"].immediatelyToEnd();
                 delete this.animations["position"];
                 this._checkAndSetNeedsRender();
             }
-            var newPosition = newValue.round();
-            if (this._position != newPosition) {
-                this._position = newPosition;
+            if (this._position != newValue) {
+                this._position = newValue;
                 this._checkAndSetNeedsRender();
             }
         }
@@ -2748,7 +2926,7 @@ var View = function (_BaseObject) {
 
 exports.default = View;
 
-},{"../util/Util.js":5,"./Animator":6,"./BaseObject":7,"./CGContext":9,"./Drawloop":10,"./Geometry":12}],17:[function(require,module,exports){
+},{"../util/Util.js":5,"./Animator":6,"./BaseObject":7,"./CGContext":9,"./Drawloop":10,"./Geometry":12}],18:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2803,6 +2981,7 @@ var Window = function (_View) {
         _this.rootView = _Util.nil;
         _this.firstResponser = _this;
         _this.isDown = false;
+        _this._lastMoveEvent = _Util.nil;
         return _this;
     }
 
@@ -2833,6 +3012,7 @@ var Window = function (_View) {
     }, {
         key: 'receiveMouseDown',
         value: function receiveMouseDown(point) {
+            this._lastMoveEvent = _Util.nil;
             this.isDown = true;
             var p = new _Geometry.Point(point[0], point[1]);
             var responser = this.hitTest(p);
@@ -2862,7 +3042,12 @@ var Window = function (_View) {
             event.point = this.convertPointToView(p, event.firstResponser);
             event.windowPoint = p;
             event.event = "mouseMove";
+            if (this._lastMoveEvent && this._lastMoveEvent.firstResponser === event.firstResponser) {
+                event.offset = event.point.minus(this._lastMoveEvent.point);
+                console.log(event.offset.y + "");
+            }
             event.firstResponser.mouseMove(event);
+            this._lastMoveEvent = event;
         }
     }, {
         key: 'receiveMouseUp',
@@ -2894,7 +3079,7 @@ var Window = function (_View) {
     }], [{
         key: 'renderHtml',
         value: function renderHtml() {
-            return '<!DOCTYPE html>\n        <head>\n            <meta name="viewport" content="width=device-width, initial-scale=1"/>  \n            <title id="title"></title>\n            <style type="text/css">\n\t           html,body { background:#fff; height:100%; margin:0; padding:0; overflow:hidden }\n\t              canvas { position:absolute; top:0; left:0 }\n            </style>\n        </head>\n        <body>\n            <canvas id="canvas"></canvas>\n            <script src="./dist/bundle.js"></script>\n\n        <body>';
+            return '<!DOCTYPE html>\n        <head>\n            <meta name="viewport" content="width=device-width, initial-scale=1"/>\n            <title id="title"></title>\n            <style type="text/css">\n\t           html,body { background:#fff; height:100%; margin:0; padding:0; overflow:hidden }\n\t              canvas { position:absolute; top:0; left:0 }\n            </style>\n        </head>\n        <body>\n            <canvas id="canvas"></canvas>\n            <script src="./dist/bundle.js"></script>\n\n        <body>';
         }
     }]);
 
@@ -2986,4 +3171,4 @@ if (typeof window != 'undefined') {
     })();
 }
 
-},{"../main/RootView":2,"../util/Util":5,"./Drawloop":10,"./Geometry":12,"./TouchEvent":15,"./View":16}]},{},[1]);
+},{"../main/RootView":2,"../util/Util":5,"./Drawloop":10,"./Geometry":12,"./TouchEvent":16,"./View":17}]},{},[1]);
