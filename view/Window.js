@@ -71,7 +71,7 @@ export default class Window extends View {
         event.event = "mouseMove"
         if (this._lastMoveEvent && this._lastMoveEvent.firstResponser === event.firstResponser) {
             event.offset = event.point.minus(this._lastMoveEvent.point)
-            console.log(event.offset.y + "")
+           // console.log(event.offset.y + "")
         }
         event.firstResponser.mouseMove(event)
         this._lastMoveEvent = event
@@ -121,7 +121,6 @@ export default class Window extends View {
 }
 
 if (typeof window != 'undefined') {
-    console.log("Hell")
     const rooWindow = new Window()
     window.rootWindow = rooWindow
 

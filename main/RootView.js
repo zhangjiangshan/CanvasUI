@@ -13,7 +13,6 @@ export default class RootView extends View {
         super()
         this.backgroundColor  = "white"
         this.autoresizingMask = ViewAutoresizing.FlexibleWidth | ViewAutoresizing.FlexibleHeight
-        console.log("rootView")
 
         const scrollView = new ScrollView(120,150, 200, 200)
         scrollView.contentSize = new Size(400, 400)
@@ -67,7 +66,6 @@ export default class RootView extends View {
             // animation2.start()
 
             //imageView2.position = new Point(imageView2.x - 4, 200)
-            console.log("button clicked!!!!!")
         }
     }
 }

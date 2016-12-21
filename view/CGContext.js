@@ -113,7 +113,27 @@ export default class CGContext {
         const [x, y] = this.convertPoint(new Point(px, py))
         this.context.strokeRect(x, y, width, height);
     }
+    stroke() {
+        this.context.stroke()
+    }
 
+    drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight) {
+        const context = this.context
+        if (image.complete) {
+            const [x, y] = this.convertPoint(new Point(dx, dy))
+            context.drawImage(image, sx, sy, sWidth, sHeight, x, y, dWidth, dHeight)
+        } else {
+            // image not load
+        }
+    }
+
+    clip(rect, offset=true) {
+        const [x, y] = this.convertPoint(rect.position, offset)
+        this.context.rect(x, y, rect.size.width, rect.size.height)
+        this.context.clip("nonzero")
+    }
+
+    // draw text
     wrapText(text, px, py, maxWidth, lineHeight=26) {
         this.context.textBaseline = "top"
         let [x, y] = this.convertPoint(new Point(px, py))
@@ -142,22 +162,6 @@ export default class CGContext {
         this.context.fillText(text, x, y, maxWidth);
     }
 
-    drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight) {
-        const context = this.context
-        if (image.complete) {
-            const [x, y] = this.convertPoint(new Point(dx, dy))
-            context.drawImage(image, sx, sy, sWidth, sHeight, x, y, dWidth, dHeight)
-        } else {
-            // image not load
-        }
-    }
-
-    clip(rect, offset=true) {
-        const [x, y] = this.convertPoint(rect.position, offset)
-        this.context.rect(x, y, rect.size.width, rect.size.height)
-        this.context.clip("nonzero")
-    }
-
     measureText(text) {
         return this.context.measureText(text).width
     }
@@ -180,6 +184,85 @@ export default class CGContext {
         const width = ((y == 0) ? this.measureText(text) : maxWidth)
         return new Size(width, y + lineHeight)
     }
+
+    // draw path
+
+    beginPath() {
+        this.context.beginPath()
+    }
+
+    closePath() {
+        this.context.closePath()
+    }
+
+    moveTo(px, py) {
+        const [x, y] = this.convertPoint(new Point(px, py))
+        this.context.moveTo(x, y)
+    }
+
+    lineTo(px, py) {
+        const [x, y] = this.convertPoint(new Point(px, py))
+        this.context.lineTo(x, y)
+    }
+
+    bezierCurveTo(cp1x, cp1y, cp2x, cp2y, px, py) {
+        const [c1x, c1y] = this.convertPoint(new Point(cp1x, cp1y))
+        const [c2x, c2y] = this.convertPoint(new Point(cp2x, cp2y))
+        const [x, y] = this.convertPoint(new Point(px, py))
+        this.context.bezierCurveTo(c1x, c1y, c2x, c2y, x, y)
+    }
+
+    quadraticCurveTo(cp1x, cp1y, px, py) {
+        const [c1x, c1y] = this.convertPoint(new Point(cp1x, cp1y))
+        const [x, y] = this.convertPoint(new Point(px, py))
+        this.context.quadraticCurveTo(c1x, c1y, x, y)
+    }
+
+    arc(px, py, radius, startAngle, endAngle, anticlockwise) {
+        const [x, y] = this.convertPoint(new Point(px, py))
+        this.context.arc(x, y, radius, startAngle, endAngle, anticlockwise)
+    }
+
+    arcTo(px1, py1, px2, py2, radius) {
+        const [x1, y1] = this.convertPoint(new Point(px1, py1))
+        const [x2, y2] = this.convertPoint(new Point(px2, py2))
+        this.context.quadraticCurveTo(x1, y1, x2, y2, radius)
+    }
+
+    radiusRect(px, py, width, height, radius) {
+        this.beginPath();
+        this.moveTo(px, py)
+        this.arc(px+radius,py+radius,radius, Math.PI,  Math.PI*1.5, false)
+        this.lineTo(px+width - radius,py)
+        this.arc(px+width-radius, py+radius, radius, Math.PI*1.5,  Math.PI*2, false)
+        this.lineTo(px+width, py+height - radius)
+        this.arc(px+width-radius, py+height-radius, radius, 0,  Math.PI*0.5, false)
+        this.lineTo(px+radius, py+height)
+        this.arc(px+radius, py+height-radius, radius, Math.PI*0.5,  Math.PI, false)
+        this.closePath()
+    }
+
+    // experiment
+    ellipse(px, py, radiuspx, radiuspy, rotation, startAngle, endAngle, anticlockwise) {
+        const [x1, y1] = this.convertPoint(new Point(px1, py1))
+        const [x2, y2] = this.convertPoint(new Point(radiuspx, radiuspy))
+        this.context.ellipse(x1, y1, x2, y2, rotation, startAngle, endAngle, anticlockwise)
+    }
+
+    rect(px, py, width, height) {
+        const [x, y] = this.convertPoint(new Point(px, py))
+        this.context.rect(x, y, width, height)
+    }
+
+    fill() {
+        this.context.fill()
+    }
+
+    stroke() {
+        this.context.stroke()
+    }
+
+    // image context
 
     static createImage(width, height, drawFunc) {
         var canvas = document.createElement(uuid.v1());

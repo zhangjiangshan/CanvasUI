@@ -21,7 +21,7 @@ export default class View extends BaseObject {
         this.window = nil
         this.userInteractionEnabled = true
         this._clipToBounds = false
-
+        this.cornerRadius = 0
         //boarder && shadow
         this._boarderColor = nil
         this._boarderWidth = 0
@@ -118,7 +118,7 @@ export default class View extends BaseObject {
             return
         }
         if (this.animations["alpha"]) {
-            this.animations["alpha"].cancel()
+            this.animations["alpha"].immediatelyToEnd()
             delete this.animations["alpha"]
             this._checkAndSetNeedsRender()
         }
@@ -162,7 +162,7 @@ export default class View extends BaseObject {
             return
         }
         if (this.animations["size"]) {
-            this.animations["size"].cancel()
+            this.animations["size"].immediatelyToEnd()
             delete this.animations["size"]
             this._checkAndSetNeedsRender()
         }
@@ -295,6 +295,30 @@ export default class View extends BaseObject {
         const canvas = document.getElementById("canvas");
         return canvas.getContext("2d");
     }
+
+    bringSubviewToFront(view) {
+        const index = this.subviews.indexOf(view)
+        if (index == this.subviews.count - 1) {
+            return
+        }
+        if (index != -1) {
+            this.subviews.splice(index, 1)
+            this.subviews.push(view)
+
+        }
+    }
+
+    sendSubviewToBack(view) {
+        const index = this.subviews.indexOf(view)
+        if (index == 0) {
+            return
+        }
+        if (index != -1) {
+            this.subviews.splice(index, 1)
+            this.subviews.splice(0, 0, view)
+        }
+    }
+
 
     addSubview(view) {
         if (view.superview === this) {
@@ -444,6 +468,10 @@ export default class View extends BaseObject {
         ctx.restore()
     }
 
+    draw(ctx) {
+
+    }
+
     render(ctx) {
         ctx.save()
         ctx.alpha = ctx.alpha * this.backgroundAlpha
@@ -452,15 +480,28 @@ export default class View extends BaseObject {
             ctx.shadowBlur = this.shadowBlur
             ctx.shadowOffset = this.shadowOffset
             ctx.fillStyle = this.backgroundColor;
-            ctx.fillRect(0, 0, this.size.width, this.size.height)
-            if (this.boarderWidth != 0) {
-                ctx.strokeStyle = this.boarderColor
-                ctx.lineWidth = this.boarderWidth
-                ctx.strokeRect(0, 0, this.size.width, this.size.height)
+            if (this.cornerRadius != 0) {
+                ctx.radiusRect(0, 0, this.width, this.height, this.cornerRadius)
+                ctx.fill()
+                this.draw(ctx)
+                if (this.boarderWidth != 0) {
+                    ctx.strokeStyle = this.boarderColor
+                    ctx.lineWidth = this.boarderWidth
+                    ctx.stroke()
+                }
+            } else {
+                ctx.fillRect(0, 0, this.width, this.height)
+                this.draw(ctx)
+                if (this.boarderWidth != 0) {
+                    ctx.strokeStyle = this.boarderColor
+                    ctx.lineWidth = this.boarderWidth
+                    ctx.strokeRect(0, 0, this.width, this.height)
+                }
             }
         }
         ctx.restore()
     }
+
 
     toString() {
         return `${this.className()}:{position:(${this.position.x},${this.position.y}), size:(${this.size.width},${this.size.height})}`

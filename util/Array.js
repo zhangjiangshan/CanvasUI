@@ -26,3 +26,19 @@ Array.prototype.reverseArray = function() {
     const array = this.slice()
     return array.reverse()
 }
+
+Array.prototype.swap = function(index1, index2) {
+    let array = this.slice()
+    let obj = this[index1]
+    this[index1] = this[index2]
+    this[index2] = obj
+    return array
+}
+
+Array.prototype.swap = function(index1, index2) {
+    let array = this.slice()
+    let obj = this[index1]
+    this[index1] = this[index2]
+    this[index2] = obj
+    return array
+}

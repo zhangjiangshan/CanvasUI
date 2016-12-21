@@ -11,7 +11,7 @@ var _Window2 = _interopRequireDefault(_Window);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"./util/Array":3,"./view/Window":18}],2:[function(require,module,exports){
+},{"./util/Array":3,"./view/Window":19}],2:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -60,7 +60,6 @@ var RootView = function (_View) {
 
         _this.backgroundColor = "white";
         _this.autoresizingMask = _Geometry.ViewAutoresizing.FlexibleWidth | _Geometry.ViewAutoresizing.FlexibleHeight;
-        console.log("rootView");
 
         var scrollView = new _ScrollView2.default(120, 150, 200, 200);
         scrollView.contentSize = new _Geometry.Size(400, 400);
@@ -114,7 +113,6 @@ var RootView = function (_View) {
             // animation2.start()
 
             //imageView2.position = new Point(imageView2.x - 4, 200)
-            console.log("button clicked!!!!!");
         };
         return _this;
     }
@@ -124,7 +122,7 @@ var RootView = function (_View) {
 
 exports.default = RootView;
 
-},{"../view/Animator":6,"../view/Button":8,"../view/Geometry":12,"../view/ImageView":13,"../view/Label":14,"../view/ScrollView":15,"../view/View":17}],3:[function(require,module,exports){
+},{"../view/Animator":6,"../view/Button":9,"../view/Geometry":13,"../view/ImageView":14,"../view/Label":15,"../view/ScrollView":16,"../view/View":18}],3:[function(require,module,exports){
 "use strict";
 
 Array.prototype.indexOfOld = Array.prototype.indexOf;
@@ -152,6 +150,22 @@ Array.prototype.removeObject = function (object) {
 Array.prototype.reverseArray = function () {
     var array = this.slice();
     return array.reverse();
+};
+
+Array.prototype.swap = function (index1, index2) {
+    var array = this.slice();
+    var obj = this[index1];
+    this[index1] = this[index2];
+    this[index2] = obj;
+    return array;
+};
+
+Array.prototype.swap = function (index1, index2) {
+    var array = this.slice();
+    var obj = this[index1];
+    this[index1] = this[index2];
+    this[index2] = obj;
+    return array;
 };
 
 },{}],4:[function(require,module,exports){
@@ -817,7 +831,7 @@ var AnimatAction = exports.AnimatAction = function (_AnimationBase3) {
     return AnimatAction;
 }(AnimationBase);
 
-},{"../util/Tween":4,"../util/Util":5,"./Drawloop":10}],7:[function(require,module,exports){
+},{"../util/Tween":4,"../util/Util":5,"./Drawloop":11}],7:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -865,6 +879,201 @@ var BaseObject = function () {
 exports.default = BaseObject;
 
 },{}],8:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _BaseObject = require('./BaseObject');
+
+var _BaseObject2 = _interopRequireDefault(_BaseObject);
+
+var _Util = require('../util/Util.js');
+
+var _Drawloop = require('./Drawloop');
+
+var _Geometry = require('./Geometry');
+
+var _CGContext = require('./CGContext');
+
+var _CGContext2 = _interopRequireDefault(_CGContext);
+
+var _Animator = require('./Animator');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var BezierPath = function () {
+    function BezierPath(view) {
+        _classCallCheck(this, BezierPath);
+
+        this.path = new Path2D();
+        this.view = view;
+    }
+
+    _createClass(BezierPath, [{
+        key: 'convertPoint',
+        value: function convertPoint(point) {
+            var offset = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
+
+            var position = this.view.convertPointToView(point, this.view.window, offset);
+            return [position.x, position.y];
+        }
+    }, {
+        key: 'addPath',
+        value: function addPath(path2d) {
+            this.path.addPath(path2d);
+        }
+    }, {
+        key: 'closePath',
+        value: function closePath() {
+            this.path.closePath();
+        }
+    }, {
+        key: 'moveTo',
+        value: function moveTo(px, py) {
+            var _convertPoint = this.convertPoint(new _Geometry.Point(px, py));
+
+            var _convertPoint2 = _slicedToArray(_convertPoint, 2);
+
+            var x = _convertPoint2[0];
+            var y = _convertPoint2[1];
+
+            this.path.moveTo(x, y);
+        }
+    }, {
+        key: 'lineTo',
+        value: function lineTo(px, py) {
+            var _convertPoint3 = this.convertPoint(new _Geometry.Point(px, py));
+
+            var _convertPoint4 = _slicedToArray(_convertPoint3, 2);
+
+            var x = _convertPoint4[0];
+            var y = _convertPoint4[1];
+
+            this.path.lineTo(x, y);
+        }
+    }, {
+        key: 'bezierCurveTo',
+        value: function bezierCurveTo(cp1x, cp1y, cp2x, cp2y, px, py) {
+            var _convertPoint5 = this.convertPoint(new _Geometry.Point(cp1x, cp1y));
+
+            var _convertPoint6 = _slicedToArray(_convertPoint5, 2);
+
+            var c1x = _convertPoint6[0];
+            var c1y = _convertPoint6[1];
+
+            var _convertPoint7 = this.convertPoint(new _Geometry.Point(cp2x, cp2y));
+
+            var _convertPoint8 = _slicedToArray(_convertPoint7, 2);
+
+            var c2x = _convertPoint8[0];
+            var c2y = _convertPoint8[1];
+
+            var _convertPoint9 = this.convertPoint(new _Geometry.Point(px, py));
+
+            var _convertPoint10 = _slicedToArray(_convertPoint9, 2);
+
+            var x = _convertPoint10[0];
+            var y = _convertPoint10[1];
+
+            this.path.bezierCurveTo(c1x, c1y, c2x, c2y, x, y);
+        }
+    }, {
+        key: 'quadraticCurveTo',
+        value: function quadraticCurveTo(cp1x, cp1y, px, py) {
+            var _convertPoint11 = this.convertPoint(new _Geometry.Point(cp1x, cp1y));
+
+            var _convertPoint12 = _slicedToArray(_convertPoint11, 2);
+
+            var c1x = _convertPoint12[0];
+            var c1y = _convertPoint12[1];
+
+            var _convertPoint13 = this.convertPoint(new _Geometry.Point(px, py));
+
+            var _convertPoint14 = _slicedToArray(_convertPoint13, 2);
+
+            var x = _convertPoint14[0];
+            var y = _convertPoint14[1];
+
+            this.path.quadraticCurveTo(c1x, c1y, x, y);
+        }
+    }, {
+        key: 'arc',
+        value: function arc(px, py, radius, startAngle, endAngle, anticlockwise) {
+            var _convertPoint15 = this.convertPoint(new _Geometry.Point(px, py));
+
+            var _convertPoint16 = _slicedToArray(_convertPoint15, 2);
+
+            var x = _convertPoint16[0];
+            var y = _convertPoint16[1];
+
+            this.arc(x, y, radius, startAngle, endAngle, anticlockwise);
+        }
+    }, {
+        key: 'arcTo',
+        value: function arcTo(px1, py1, px2, py2, radius) {
+            var _convertPoint17 = this.convertPoint(new _Geometry.Point(px1, py1));
+
+            var _convertPoint18 = _slicedToArray(_convertPoint17, 2);
+
+            var x1 = _convertPoint18[0];
+            var y1 = _convertPoint18[1];
+
+            var _convertPoint19 = this.convertPoint(new _Geometry.Point(px2, py2));
+
+            var _convertPoint20 = _slicedToArray(_convertPoint19, 2);
+
+            var x2 = _convertPoint20[0];
+            var y2 = _convertPoint20[1];
+
+            this.path.quadraticCurveTo(x1, y1, x2, y2, radius);
+        }
+    }, {
+        key: 'ellipse',
+        value: function ellipse(px, py, radiuspx, radiuspy, rotation, startAngle, endAngle, anticlockwise) {
+            var _convertPoint21 = this.convertPoint(new _Geometry.Point(px1, py1));
+
+            var _convertPoint22 = _slicedToArray(_convertPoint21, 2);
+
+            var x1 = _convertPoint22[0];
+            var y1 = _convertPoint22[1];
+
+            var _convertPoint23 = this.convertPoint(new _Geometry.Point(radiuspx, radiuspy));
+
+            var _convertPoint24 = _slicedToArray(_convertPoint23, 2);
+
+            var x2 = _convertPoint24[0];
+            var y2 = _convertPoint24[1];
+
+            this.path.ellipse(x1, y1, x2, y2, rotation, startAngle, endAngle, anticlockwise);
+        }
+    }, {
+        key: 'rect',
+        value: function rect(px, py, width, height) {
+            var _convertPoint25 = this.convertPoint(new _Geometry.Point(px, py));
+
+            var _convertPoint26 = _slicedToArray(_convertPoint25, 2);
+
+            var x = _convertPoint26[0];
+            var y = _convertPoint26[1];
+
+            this.path.rect(x, y, width, height);
+        }
+    }]);
+
+    return BezierPath;
+}();
+
+exports.default = BezierPath;
+
+},{"../util/Util.js":5,"./Animator":6,"./BaseObject":7,"./CGContext":10,"./Drawloop":11,"./Geometry":13}],9:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1053,7 +1262,7 @@ var Button = function (_View) {
 
 exports.default = Button;
 
-},{"../util/Util":5,"./Font":11,"./Geometry":12,"./ImageView":13,"./Label":14,"./View":17}],9:[function(require,module,exports){
+},{"../util/Util":5,"./Font":12,"./Geometry":13,"./ImageView":14,"./Label":15,"./View":18}],10:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1123,18 +1332,58 @@ var CGContext = function () {
             this.context.strokeRect(x, y, width, height);
         }
     }, {
+        key: 'stroke',
+        value: function stroke() {
+            this.context.stroke();
+        }
+    }, {
+        key: 'drawImage',
+        value: function drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight) {
+            var context = this.context;
+            if (image.complete) {
+                var _convertPoint5 = this.convertPoint(new _Geometry.Point(dx, dy));
+
+                var _convertPoint6 = _slicedToArray(_convertPoint5, 2);
+
+                var x = _convertPoint6[0];
+                var y = _convertPoint6[1];
+
+                context.drawImage(image, sx, sy, sWidth, sHeight, x, y, dWidth, dHeight);
+            } else {
+                // image not load
+            }
+        }
+    }, {
+        key: 'clip',
+        value: function clip(rect) {
+            var offset = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
+
+            var _convertPoint7 = this.convertPoint(rect.position, offset);
+
+            var _convertPoint8 = _slicedToArray(_convertPoint7, 2);
+
+            var x = _convertPoint8[0];
+            var y = _convertPoint8[1];
+
+            this.context.rect(x, y, rect.size.width, rect.size.height);
+            this.context.clip("nonzero");
+        }
+
+        // draw text
+
+    }, {
         key: 'wrapText',
         value: function wrapText(text, px, py, maxWidth) {
             var lineHeight = arguments.length <= 4 || arguments[4] === undefined ? 26 : arguments[4];
 
             this.context.textBaseline = "top";
 
-            var _convertPoint5 = this.convertPoint(new _Geometry.Point(px, py));
+            var _convertPoint9 = this.convertPoint(new _Geometry.Point(px, py));
 
-            var _convertPoint6 = _slicedToArray(_convertPoint5, 2);
+            var _convertPoint10 = _slicedToArray(_convertPoint9, 2);
 
-            var x = _convertPoint6[0];
-            var y = _convertPoint6[1];
+            var x = _convertPoint10[0];
+            var y = _convertPoint10[1];
 
 
             var words = text.split('');
@@ -1159,47 +1408,15 @@ var CGContext = function () {
         value: function fillText(text, px, py) {
             var maxWidth = arguments.length <= 3 || arguments[3] === undefined ? 9999 : arguments[3];
 
-            var _convertPoint7 = this.convertPoint(new _Geometry.Point(px, py));
-
-            var _convertPoint8 = _slicedToArray(_convertPoint7, 2);
-
-            var x = _convertPoint8[0];
-            var y = _convertPoint8[1];
-            //this.context.textBaseline = this.textBaseline
-
-            this.context.fillText(text, x, y, maxWidth);
-        }
-    }, {
-        key: 'drawImage',
-        value: function drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight) {
-            var context = this.context;
-            if (image.complete) {
-                var _convertPoint9 = this.convertPoint(new _Geometry.Point(dx, dy));
-
-                var _convertPoint10 = _slicedToArray(_convertPoint9, 2);
-
-                var x = _convertPoint10[0];
-                var y = _convertPoint10[1];
-
-                context.drawImage(image, sx, sy, sWidth, sHeight, x, y, dWidth, dHeight);
-            } else {
-                // image not load
-            }
-        }
-    }, {
-        key: 'clip',
-        value: function clip(rect) {
-            var offset = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
-
-            var _convertPoint11 = this.convertPoint(rect.position, offset);
+            var _convertPoint11 = this.convertPoint(new _Geometry.Point(px, py));
 
             var _convertPoint12 = _slicedToArray(_convertPoint11, 2);
 
             var x = _convertPoint12[0];
             var y = _convertPoint12[1];
+            //this.context.textBaseline = this.textBaseline
 
-            this.context.rect(x, y, rect.size.width, rect.size.height);
-            this.context.clip("nonzero");
+            this.context.fillText(text, x, y, maxWidth);
         }
     }, {
         key: 'measureText',
@@ -1227,6 +1444,180 @@ var CGContext = function () {
             var width = y == 0 ? this.measureText(text) : maxWidth;
             return new _Geometry.Size(width, y + lineHeight);
         }
+
+        // draw path
+
+    }, {
+        key: 'beginPath',
+        value: function beginPath() {
+            this.context.beginPath();
+        }
+    }, {
+        key: 'closePath',
+        value: function closePath() {
+            this.context.closePath();
+        }
+    }, {
+        key: 'moveTo',
+        value: function moveTo(px, py) {
+            var _convertPoint13 = this.convertPoint(new _Geometry.Point(px, py));
+
+            var _convertPoint14 = _slicedToArray(_convertPoint13, 2);
+
+            var x = _convertPoint14[0];
+            var y = _convertPoint14[1];
+
+            this.context.moveTo(x, y);
+        }
+    }, {
+        key: 'lineTo',
+        value: function lineTo(px, py) {
+            var _convertPoint15 = this.convertPoint(new _Geometry.Point(px, py));
+
+            var _convertPoint16 = _slicedToArray(_convertPoint15, 2);
+
+            var x = _convertPoint16[0];
+            var y = _convertPoint16[1];
+
+            this.context.lineTo(x, y);
+        }
+    }, {
+        key: 'bezierCurveTo',
+        value: function bezierCurveTo(cp1x, cp1y, cp2x, cp2y, px, py) {
+            var _convertPoint17 = this.convertPoint(new _Geometry.Point(cp1x, cp1y));
+
+            var _convertPoint18 = _slicedToArray(_convertPoint17, 2);
+
+            var c1x = _convertPoint18[0];
+            var c1y = _convertPoint18[1];
+
+            var _convertPoint19 = this.convertPoint(new _Geometry.Point(cp2x, cp2y));
+
+            var _convertPoint20 = _slicedToArray(_convertPoint19, 2);
+
+            var c2x = _convertPoint20[0];
+            var c2y = _convertPoint20[1];
+
+            var _convertPoint21 = this.convertPoint(new _Geometry.Point(px, py));
+
+            var _convertPoint22 = _slicedToArray(_convertPoint21, 2);
+
+            var x = _convertPoint22[0];
+            var y = _convertPoint22[1];
+
+            this.context.bezierCurveTo(c1x, c1y, c2x, c2y, x, y);
+        }
+    }, {
+        key: 'quadraticCurveTo',
+        value: function quadraticCurveTo(cp1x, cp1y, px, py) {
+            var _convertPoint23 = this.convertPoint(new _Geometry.Point(cp1x, cp1y));
+
+            var _convertPoint24 = _slicedToArray(_convertPoint23, 2);
+
+            var c1x = _convertPoint24[0];
+            var c1y = _convertPoint24[1];
+
+            var _convertPoint25 = this.convertPoint(new _Geometry.Point(px, py));
+
+            var _convertPoint26 = _slicedToArray(_convertPoint25, 2);
+
+            var x = _convertPoint26[0];
+            var y = _convertPoint26[1];
+
+            this.context.quadraticCurveTo(c1x, c1y, x, y);
+        }
+    }, {
+        key: 'arc',
+        value: function arc(px, py, radius, startAngle, endAngle, anticlockwise) {
+            var _convertPoint27 = this.convertPoint(new _Geometry.Point(px, py));
+
+            var _convertPoint28 = _slicedToArray(_convertPoint27, 2);
+
+            var x = _convertPoint28[0];
+            var y = _convertPoint28[1];
+
+            this.context.arc(x, y, radius, startAngle, endAngle, anticlockwise);
+        }
+    }, {
+        key: 'arcTo',
+        value: function arcTo(px1, py1, px2, py2, radius) {
+            var _convertPoint29 = this.convertPoint(new _Geometry.Point(px1, py1));
+
+            var _convertPoint30 = _slicedToArray(_convertPoint29, 2);
+
+            var x1 = _convertPoint30[0];
+            var y1 = _convertPoint30[1];
+
+            var _convertPoint31 = this.convertPoint(new _Geometry.Point(px2, py2));
+
+            var _convertPoint32 = _slicedToArray(_convertPoint31, 2);
+
+            var x2 = _convertPoint32[0];
+            var y2 = _convertPoint32[1];
+
+            this.context.quadraticCurveTo(x1, y1, x2, y2, radius);
+        }
+    }, {
+        key: 'radiusRect',
+        value: function radiusRect(px, py, width, height, radius) {
+            this.beginPath();
+            this.moveTo(px, py);
+            this.arc(px + radius, py + radius, radius, Math.PI, Math.PI * 1.5, false);
+            this.lineTo(px + width - radius, py);
+            this.arc(px + width - radius, py + radius, radius, Math.PI * 1.5, Math.PI * 2, false);
+            this.lineTo(px + width, py + height - radius);
+            this.arc(px + width - radius, py + height - radius, radius, 0, Math.PI * 0.5, false);
+            this.lineTo(px + radius, py + height);
+            this.arc(px + radius, py + height - radius, radius, Math.PI * 0.5, Math.PI, false);
+            this.closePath();
+        }
+
+        // experiment
+
+    }, {
+        key: 'ellipse',
+        value: function ellipse(px, py, radiuspx, radiuspy, rotation, startAngle, endAngle, anticlockwise) {
+            var _convertPoint33 = this.convertPoint(new _Geometry.Point(px1, py1));
+
+            var _convertPoint34 = _slicedToArray(_convertPoint33, 2);
+
+            var x1 = _convertPoint34[0];
+            var y1 = _convertPoint34[1];
+
+            var _convertPoint35 = this.convertPoint(new _Geometry.Point(radiuspx, radiuspy));
+
+            var _convertPoint36 = _slicedToArray(_convertPoint35, 2);
+
+            var x2 = _convertPoint36[0];
+            var y2 = _convertPoint36[1];
+
+            this.context.ellipse(x1, y1, x2, y2, rotation, startAngle, endAngle, anticlockwise);
+        }
+    }, {
+        key: 'rect',
+        value: function rect(px, py, width, height) {
+            var _convertPoint37 = this.convertPoint(new _Geometry.Point(px, py));
+
+            var _convertPoint38 = _slicedToArray(_convertPoint37, 2);
+
+            var x = _convertPoint38[0];
+            var y = _convertPoint38[1];
+
+            this.context.rect(x, y, width, height);
+        }
+    }, {
+        key: 'fill',
+        value: function fill() {
+            this.context.fill();
+        }
+    }, {
+        key: 'stroke',
+        value: function stroke() {
+            this.context.stroke();
+        }
+
+        // image context
+
     }, {
         key: 'context',
         get: function get() {
@@ -1345,7 +1736,7 @@ var CGContext = function () {
 
 exports.default = CGContext;
 
-},{"../util/Util.js":5,"./Geometry":12}],10:[function(require,module,exports){
+},{"../util/Util.js":5,"./Geometry":13}],11:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1408,7 +1799,7 @@ var Drawloop = function () {
 
 var drawloop = exports.drawloop = new Drawloop();
 
-},{"../util/Util.js":5}],11:[function(require,module,exports){
+},{"../util/Util.js":5}],12:[function(require,module,exports){
 "use strict";
 
 /*
@@ -1459,7 +1850,7 @@ var Font = function () {
 
 exports.default = Font;
 
-},{}],12:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1661,7 +2052,7 @@ var ViewAutoresizing = exports.ViewAutoresizing = {
     FlexibleBottomMargin: 1 << 5
 };
 
-},{}],13:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1809,7 +2200,7 @@ var ImageView = function (_View) {
 
 exports.default = ImageView;
 
-},{"../util/Util":5,"./CGContext":9,"./Geometry":12,"./View":17}],14:[function(require,module,exports){
+},{"../util/Util":5,"./CGContext":10,"./Geometry":13,"./View":18}],15:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2034,26 +2425,34 @@ var Label = function (_View) {
 
 exports.default = Label;
 
-},{"../util/Util":5,"./Font":11,"./Geometry":12,"./View":17}],15:[function(require,module,exports){
+},{"../util/Util":5,"./Font":12,"./Geometry":13,"./View":18}],16:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _Util = require('../util/Util');
 
-var _View2 = require('./View');
+var _View3 = require('./View');
 
-var _View3 = _interopRequireDefault(_View2);
+var _View4 = _interopRequireDefault(_View3);
 
 var _Geometry = require('./Geometry');
 
 var _TouchEvent = require('./TouchEvent');
 
 var _TouchEvent2 = _interopRequireDefault(_TouchEvent);
+
+var _BezierPath = require('./BezierPath');
+
+var _BezierPath2 = _interopRequireDefault(_BezierPath);
+
+var _Animator = require('../view/Animator');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -2063,8 +2462,52 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var ScrollView = function (_View) {
-    _inherits(ScrollView, _View);
+var ScrollViewIndicator = function (_View) {
+    _inherits(ScrollViewIndicator, _View);
+
+    function ScrollViewIndicator() {
+        var x = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+        var y = arguments.length <= 1 || arguments[1] === undefined ? 0 : arguments[1];
+        var width = arguments.length <= 2 || arguments[2] === undefined ? 5 : arguments[2];
+        var height = arguments.length <= 3 || arguments[3] === undefined ? 64 : arguments[3];
+
+        _classCallCheck(this, ScrollViewIndicator);
+
+        var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(ScrollViewIndicator).call(this, x, y, width, height));
+
+        _this.backgroundAlpha = 0.6;
+        _this.backgroundColor = "black";
+        _this.cornerRadius = 3;
+        _this.timeoutID = _Util.nil;
+        _this.alpha = 0;
+        return _this;
+    }
+
+    _createClass(ScrollViewIndicator, [{
+        key: 'flash',
+        value: function flash() {
+            var _this2 = this;
+
+            if (this.timeoutID != _Util.nil) {
+                window.clearTimeout(this.timeoutID);
+                this.timeoutID = _Util.nil;
+            }
+            this.alpha = 1;
+            this.timeoutID = setTimeout(function () {
+                var animation = new _Animator.AnimatAction(_this2, "alpha", 0, 0.3);
+                animation.start();
+            }, 1000);
+        }
+    }, {
+        key: 'draw',
+        value: function draw(ctx) {}
+    }]);
+
+    return ScrollViewIndicator;
+}(_View4.default);
+
+var ScrollView = function (_View2) {
+    _inherits(ScrollView, _View2);
 
     function ScrollView() {
         var x = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
@@ -2074,16 +2517,39 @@ var ScrollView = function (_View) {
 
         _classCallCheck(this, ScrollView);
 
-        var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(ScrollView).call(this, x, y, width, height));
+        var _this3 = _possibleConstructorReturn(this, Object.getPrototypeOf(ScrollView).call(this, x, y, width, height));
 
-        _this.offset = new _Geometry.Point(0, 0);
-        _this.contentSize = _this.size;
-        _this._firstResponser = _this;
-        _this.clipToBounds = true;
-        return _this;
+        _this3.offset = new _Geometry.Point(0, 0);
+        _this3.contentSize = _this3.size;
+        _this3._firstResponser = _this3;
+        _this3.clipToBounds = true;
+
+        _this3.verticalIndicator = new ScrollViewIndicator(0, 0, 5, 64);
+        _this3.addSubview(_this3.verticalIndicator);
+        _this3.verticalIndicator.position = new _Geometry.Point(_this3.contentSize.width - _this3.verticalIndicator.width, 0);
+        _this3.verticalIndicator.autoresizingMask = _Geometry.ViewAutoresizing.FlexibleLeftMargin;
+
+        _this3.horizontalIndicator = new ScrollViewIndicator(0, 0, 64, 5);
+        _this3.addSubview(_this3.horizontalIndicator);
+        _this3.horizontalIndicator.position = new _Geometry.Point(0, _this3.contentSize.height - _this3.horizontalIndicator.height);
+        _this3.horizontalIndicator.autoresizingMask = _Geometry.ViewAutoresizing.FlexibleTopMargin;
+        return _this3;
     }
 
     _createClass(ScrollView, [{
+        key: 'addSubview',
+        value: function addSubview(view) {
+            _get(Object.getPrototypeOf(ScrollView.prototype), 'addSubview', this).call(this, view);
+            this.bringSubviewToFront(this.verticalIndicator);
+            this.bringSubviewToFront(this.horizontalIndicator);
+        }
+    }, {
+        key: 'refreshIndicator',
+        value: function refreshIndicator() {
+            this.verticalIndicator.position = new _Geometry.Point(this.contentOffset.x + this.width - this.verticalIndicator.width, this.contentOffset.y / (this.contentSize.height - this.height) * (this.contentSize.height - this.verticalIndicator.size.height));
+            this.horizontalIndicator.position = new _Geometry.Point(this.contentOffset.x / (this.contentSize.width - this.width) * (this.contentSize.width - this.horizontalIndicator.size.width), this.contentOffset.y + this.height - this.horizontalIndicator.height);
+        }
+    }, {
         key: 'mouseDown',
         value: function mouseDown(event) {
             var responser = this.hitTest(event.point);
@@ -2166,11 +2632,23 @@ var ScrollView = function (_View) {
                 ctx.shadowBlur = this.shadowBlur;
                 ctx.shadowOffset = this.shadowOffset;
                 ctx.fillStyle = this.backgroundColor;
-                ctx.fillRect(0, 0, this.contentSize.width, this.contentSize.height);
-                if (this.boarderWidth != 0) {
-                    ctx.strokeStyle = this.boarderColor;
-                    ctx.lineWidth = this.boarderWidth;
-                    ctx.strokeRect(0, 0, this.contentSize.width, this.contentSize.height);
+                if (this.cornerRadius != 0) {
+                    ctx.radiusRect(0, 0, this.contentSize.width, this.contentSize.height, this.cornerRadius);
+                    ctx.fill();
+                    this.draw(ctx);
+                    if (this.boarderWidth != 0) {
+                        ctx.strokeStyle = this.boarderColor;
+                        ctx.lineWidth = this.boarderWidth;
+                        ctx.stroke();
+                    }
+                } else {
+                    ctx.fillRect(0, 0, this.contentSize.width, this.contentSize.height);
+                    this.draw(ctx);
+                    if (this.boarderWidth != 0) {
+                        ctx.strokeStyle = this.boarderColor;
+                        ctx.lineWidth = this.boarderWidth;
+                        ctx.strokeRect(0, 0, this.contentSize.width, this.contentSize.height);
+                    }
                 }
             }
             ctx.restore();
@@ -2191,17 +2669,20 @@ var ScrollView = function (_View) {
                 var maxY = this.contentSize.height - this.size.height;
                 var value = new _Geometry.Point(Math.min(Math.max(newValue.x, 0), maxX), Math.min(Math.max(newValue.y, 0), maxY));
                 this._offset = value;
+                this.refreshIndicator();
+                this.verticalIndicator.flash();
+                this.horizontalIndicator.flash();
                 this._checkAndForceRender();
             }
         }
     }]);
 
     return ScrollView;
-}(_View3.default);
+}(_View4.default);
 
 exports.default = ScrollView;
 
-},{"../util/Util":5,"./Geometry":12,"./TouchEvent":16,"./View":17}],16:[function(require,module,exports){
+},{"../util/Util":5,"../view/Animator":6,"./BezierPath":8,"./Geometry":13,"./TouchEvent":17,"./View":18}],17:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2227,7 +2708,7 @@ var TouchEvent = function TouchEvent() {
 
 exports.default = TouchEvent;
 
-},{"../util/Util":5,"./Geometry":12}],17:[function(require,module,exports){
+},{"../util/Util":5,"./Geometry":13}],18:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2285,7 +2766,7 @@ var View = function (_BaseObject) {
         _this.window = _Util.nil;
         _this.userInteractionEnabled = true;
         _this._clipToBounds = false;
-
+        _this.cornerRadius = 0;
         //boarder && shadow
         _this._boarderColor = _Util.nil;
         _this._boarderWidth = 0;
@@ -2416,6 +2897,30 @@ var View = function (_BaseObject) {
         value: function getContext() {
             var canvas = document.getElementById("canvas");
             return canvas.getContext("2d");
+        }
+    }, {
+        key: 'bringSubviewToFront',
+        value: function bringSubviewToFront(view) {
+            var index = this.subviews.indexOf(view);
+            if (index == this.subviews.count - 1) {
+                return;
+            }
+            if (index != -1) {
+                this.subviews.splice(index, 1);
+                this.subviews.push(view);
+            }
+        }
+    }, {
+        key: 'sendSubviewToBack',
+        value: function sendSubviewToBack(view) {
+            var index = this.subviews.indexOf(view);
+            if (index == 0) {
+                return;
+            }
+            if (index != -1) {
+                this.subviews.splice(index, 1);
+                this.subviews.splice(0, 0, view);
+            }
         }
     }, {
         key: 'addSubview',
@@ -2642,6 +3147,9 @@ var View = function (_BaseObject) {
             ctx.restore();
         }
     }, {
+        key: 'draw',
+        value: function draw(ctx) {}
+    }, {
         key: 'render',
         value: function render(ctx) {
             ctx.save();
@@ -2651,11 +3159,23 @@ var View = function (_BaseObject) {
                 ctx.shadowBlur = this.shadowBlur;
                 ctx.shadowOffset = this.shadowOffset;
                 ctx.fillStyle = this.backgroundColor;
-                ctx.fillRect(0, 0, this.size.width, this.size.height);
-                if (this.boarderWidth != 0) {
-                    ctx.strokeStyle = this.boarderColor;
-                    ctx.lineWidth = this.boarderWidth;
-                    ctx.strokeRect(0, 0, this.size.width, this.size.height);
+                if (this.cornerRadius != 0) {
+                    ctx.radiusRect(0, 0, this.width, this.height, this.cornerRadius);
+                    ctx.fill();
+                    this.draw(ctx);
+                    if (this.boarderWidth != 0) {
+                        ctx.strokeStyle = this.boarderColor;
+                        ctx.lineWidth = this.boarderWidth;
+                        ctx.stroke();
+                    }
+                } else {
+                    ctx.fillRect(0, 0, this.width, this.height);
+                    this.draw(ctx);
+                    if (this.boarderWidth != 0) {
+                        ctx.strokeStyle = this.boarderColor;
+                        ctx.lineWidth = this.boarderWidth;
+                        ctx.strokeRect(0, 0, this.width, this.height);
+                    }
                 }
             }
             ctx.restore();
@@ -2825,7 +3345,7 @@ var View = function (_BaseObject) {
                 return;
             }
             if (this.animations["alpha"]) {
-                this.animations["alpha"].cancel();
+                this.animations["alpha"].immediatelyToEnd();
                 delete this.animations["alpha"];
                 this._checkAndSetNeedsRender();
             }
@@ -2871,7 +3391,7 @@ var View = function (_BaseObject) {
                 return;
             }
             if (this.animations["size"]) {
-                this.animations["size"].cancel();
+                this.animations["size"].immediatelyToEnd();
                 delete this.animations["size"];
                 this._checkAndSetNeedsRender();
             }
@@ -2926,7 +3446,7 @@ var View = function (_BaseObject) {
 
 exports.default = View;
 
-},{"../util/Util.js":5,"./Animator":6,"./BaseObject":7,"./CGContext":9,"./Drawloop":10,"./Geometry":12}],18:[function(require,module,exports){
+},{"../util/Util.js":5,"./Animator":6,"./BaseObject":7,"./CGContext":10,"./Drawloop":11,"./Geometry":13}],19:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3044,7 +3564,7 @@ var Window = function (_View) {
             event.event = "mouseMove";
             if (this._lastMoveEvent && this._lastMoveEvent.firstResponser === event.firstResponser) {
                 event.offset = event.point.minus(this._lastMoveEvent.point);
-                console.log(event.offset.y + "");
+                // console.log(event.offset.y + "")
             }
             event.firstResponser.mouseMove(event);
             this._lastMoveEvent = event;
@@ -3160,7 +3680,6 @@ if (typeof window != 'undefined') {
             rootWindow.receiveMouseUp(point);
         };
 
-        console.log("Hell");
         var rooWindow = new Window();
         window.rootWindow = rooWindow;
 
@@ -3171,4 +3690,4 @@ if (typeof window != 'undefined') {
     })();
 }
 
-},{"../main/RootView":2,"../util/Util":5,"./Drawloop":10,"./Geometry":12,"./TouchEvent":16,"./View":17}]},{},[1]);
+},{"../main/RootView":2,"../util/Util":5,"./Drawloop":11,"./Geometry":13,"./TouchEvent":17,"./View":18}]},{},[1]);

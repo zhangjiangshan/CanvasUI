@@ -3,6 +3,35 @@ import {nil} from '../util/Util'
 import View from './View'
 import {Point, Size, Edge, ViewAutoresizing} from './Geometry'
 import TouchEvent from './TouchEvent'
+import BezierPath from './BezierPath'
+import {AnimatAction} from '../view/Animator'
+
+class ScrollViewIndicator extends View {
+    constructor(x=0, y=0, width=5, height=64) {
+        super(x, y, width, height)
+        this.backgroundAlpha = 0.6
+        this.backgroundColor = "black"
+        this.cornerRadius = 3
+        this.timeoutID = nil
+        this.alpha = 0
+    }
+
+    flash() {
+        if(this.timeoutID != nil) {
+            window.clearTimeout(this.timeoutID)
+            this.timeoutID = nil
+        }
+        this.alpha = 1
+        this.timeoutID = setTimeout(() => {
+            const animation = new AnimatAction(this, "alpha", 0, 0.3)
+            animation.start()
+        }, 1000)
+    }
+
+    draw(ctx) {
+        
+    }
+}
 
 export default class ScrollView extends View {
     constructor(x=0, y=0, width=0, height=0) {
@@ -11,6 +40,28 @@ export default class ScrollView extends View {
         this.contentSize = this.size
         this._firstResponser = this
         this.clipToBounds = true
+
+        this.verticalIndicator = new ScrollViewIndicator(0, 0, 5, 64)
+        this.addSubview(this.verticalIndicator)
+        this.verticalIndicator.position = new Point(this.contentSize.width - this.verticalIndicator.width, 0)
+        this.verticalIndicator.autoresizingMask = ViewAutoresizing.FlexibleLeftMargin
+
+        this.horizontalIndicator = new ScrollViewIndicator(0, 0, 64, 5)
+        this.addSubview(this.horizontalIndicator)
+        this.horizontalIndicator.position = new Point(0, this.contentSize.height - this.horizontalIndicator.height)
+        this.horizontalIndicator.autoresizingMask = ViewAutoresizing.FlexibleTopMargin
+    }
+
+    addSubview(view) {
+        super.addSubview(view)
+        this.bringSubviewToFront(this.verticalIndicator)
+        this.bringSubviewToFront(this.horizontalIndicator)
+    }
+
+    refreshIndicator() {
+        this.verticalIndicator.position = new Point(this.contentOffset.x + this.width - this.verticalIndicator.width, this.contentOffset.y / (this.contentSize.height - this.height) * (this.contentSize.height - this.verticalIndicator.size.height))
+        this.horizontalIndicator.position = new Point(this.contentOffset.x / (this.contentSize.width - this.width) * (this.contentSize.width - this.horizontalIndicator.size.width), this.contentOffset.y + this.height - this.horizontalIndicator.height)
+
     }
 
     get contentOffset() {
@@ -22,6 +73,9 @@ export default class ScrollView extends View {
             const maxY = this.contentSize.height - this.size.height
             const value = new Point(Math.min(Math.max(newValue.x, 0), maxX), Math.min(Math.max(newValue.y, 0), maxY))
             this._offset = value
+            this.refreshIndicator()
+            this.verticalIndicator.flash()
+            this.horizontalIndicator.flash()
             this._checkAndForceRender()
         }
     }
@@ -103,11 +157,23 @@ export default class ScrollView extends View {
             ctx.shadowBlur = this.shadowBlur
             ctx.shadowOffset = this.shadowOffset
             ctx.fillStyle = this.backgroundColor;
-            ctx.fillRect(0, 0, this.contentSize.width, this.contentSize.height)
-            if (this.boarderWidth != 0) {
-                ctx.strokeStyle = this.boarderColor
-                ctx.lineWidth = this.boarderWidth
-                ctx.strokeRect(0, 0, this.contentSize.width, this.contentSize.height)
+            if (this.cornerRadius != 0) {
+                ctx.radiusRect(0, 0, this.contentSize.width, this.contentSize.height, this.cornerRadius)
+                ctx.fill()
+                this.draw(ctx)
+                if (this.boarderWidth != 0) {
+                    ctx.strokeStyle = this.boarderColor
+                    ctx.lineWidth = this.boarderWidth
+                    ctx.stroke()
+                }
+            } else {
+                ctx.fillRect(0, 0, this.contentSize.width, this.contentSize.height)
+                this.draw(ctx)
+                if (this.boarderWidth != 0) {
+                    ctx.strokeStyle = this.boarderColor
+                    ctx.lineWidth = this.boarderWidth
+                    ctx.strokeRect(0, 0, this.contentSize.width, this.contentSize.height)
+                }
             }
         }
         ctx.restore()
