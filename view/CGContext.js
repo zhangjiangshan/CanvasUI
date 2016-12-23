@@ -127,9 +127,11 @@ export default class CGContext {
         }
     }
 
-    clip(rect, offset=true) {
-        const [x, y] = this.convertPoint(rect.position, offset)
-        this.context.rect(x, y, rect.size.width, rect.size.height)
+    clip(rect=nil, offset=true) {
+        if (rect) {
+            const [x, y] = this.convertPoint(rect.position, offset)
+            this.context.rect(x, y, rect.size.width, rect.size.height)
+        }
         this.context.clip("nonzero")
     }
 

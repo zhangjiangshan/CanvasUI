@@ -1355,17 +1355,20 @@ var CGContext = function () {
         }
     }, {
         key: 'clip',
-        value: function clip(rect) {
+        value: function clip() {
+            var rect = arguments.length <= 0 || arguments[0] === undefined ? _Util.nil : arguments[0];
             var offset = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
 
-            var _convertPoint7 = this.convertPoint(rect.position, offset);
+            if (rect) {
+                var _convertPoint7 = this.convertPoint(rect.position, offset);
 
-            var _convertPoint8 = _slicedToArray(_convertPoint7, 2);
+                var _convertPoint8 = _slicedToArray(_convertPoint7, 2);
 
-            var x = _convertPoint8[0];
-            var y = _convertPoint8[1];
+                var x = _convertPoint8[0];
+                var y = _convertPoint8[1];
 
-            this.context.rect(x, y, rect.size.width, rect.size.height);
+                this.context.rect(x, y, rect.size.width, rect.size.height);
+            }
             this.context.clip("nonzero");
         }
 
@@ -2480,6 +2483,7 @@ var ScrollViewIndicator = function (_View) {
         _this.cornerRadius = 3;
         _this.timeoutID = _Util.nil;
         _this.alpha = 0;
+        _this.clipToBounds = true;
         return _this;
     }
 
@@ -2632,23 +2636,12 @@ var ScrollView = function (_View2) {
                 ctx.shadowBlur = this.shadowBlur;
                 ctx.shadowOffset = this.shadowOffset;
                 ctx.fillStyle = this.backgroundColor;
-                if (this.cornerRadius != 0) {
-                    ctx.radiusRect(0, 0, this.contentSize.width, this.contentSize.height, this.cornerRadius);
-                    ctx.fill();
-                    this.draw(ctx);
-                    if (this.boarderWidth != 0) {
-                        ctx.strokeStyle = this.boarderColor;
-                        ctx.lineWidth = this.boarderWidth;
-                        ctx.stroke();
-                    }
-                } else {
-                    ctx.fillRect(0, 0, this.contentSize.width, this.contentSize.height);
-                    this.draw(ctx);
-                    if (this.boarderWidth != 0) {
-                        ctx.strokeStyle = this.boarderColor;
-                        ctx.lineWidth = this.boarderWidth;
-                        ctx.strokeRect(0, 0, this.contentSize.width, this.contentSize.height);
-                    }
+                ctx.fillRect(0, 0, this.contentSize.width, this.contentSize.height);
+                this.draw(ctx);
+                if (this.boarderWidth != 0) {
+                    ctx.strokeStyle = this.boarderColor;
+                    ctx.lineWidth = this.boarderWidth;
+                    ctx.strokeRect(0, 0, this.contentSize.width, this.contentSize.height);
                 }
             }
             ctx.restore();
@@ -2752,29 +2745,40 @@ var View = function (_BaseObject) {
 
         _classCallCheck(this, View);
 
+        // frame
+
         var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(View).call(this));
 
-        _this._backgroundColor = "#00a488";
         _this._offset = new _Geometry.Point();
         _this._position = new _Geometry.Point(x, y);
         _this._size = new _Geometry.Size(width, height);
-        _this._alpha = 1;
-        _this.backgroundAlpha = 1;
-        _this.subviews = new Array();
         _this.autoresizingMask = _Geometry.ViewAutoresizing.None;
+
+        // color
+        _this._backgroundColor = "#00a488";
+        _this.backgroundAlpha = 1;
+        _this._alpha = 1;
+
+        // views
+        _this.subviews = new Array();
         _this.superview = _Util.nil;
         _this.window = _Util.nil;
         _this.userInteractionEnabled = true;
+
+        // clip
         _this._clipToBounds = false;
-        _this.cornerRadius = 0;
-        //boarder && shadow
+        _this._cornerRadius = 0; // work with clipToBounds=true
+
+        // boarder
         _this._boarderColor = _Util.nil;
         _this._boarderWidth = 0;
 
+        // shadow
         _this._shadowBlur = 0;
         _this._shadowColor = "black";
         _this._shadowOffset = new _Geometry.Point();
 
+        // animation
         _this.animations = new Array();
         _this.an_position = _Util.nil;
         _this.an_size = _Util.nil;
@@ -3110,11 +3114,15 @@ var View = function (_BaseObject) {
     }, {
         key: '_render',
         value: function _render() {
-            //console.log(`render:${this.toString()}`)
             var ctx = new _CGContext2.default(this);
             ctx.save();
             if (this.clipToBounds) {
-                ctx.clip({ position: new _Geometry.Point(), size: this.size.copy() }, false);
+                if (this.cornerRadius != 0) {
+                    ctx.radiusRect(0, 0, this.width, this.height, this.cornerRadius);
+                    ctx.clip();
+                } else {
+                    ctx.clip({ position: new _Geometry.Point(), size: this.size.copy() }, false);
+                }
             }
             ctx.alpha = ctx.alpha * this.alpha;
             if (ctx.alpha != 0) {
@@ -3159,23 +3167,12 @@ var View = function (_BaseObject) {
                 ctx.shadowBlur = this.shadowBlur;
                 ctx.shadowOffset = this.shadowOffset;
                 ctx.fillStyle = this.backgroundColor;
-                if (this.cornerRadius != 0) {
-                    ctx.radiusRect(0, 0, this.width, this.height, this.cornerRadius);
-                    ctx.fill();
-                    this.draw(ctx);
-                    if (this.boarderWidth != 0) {
-                        ctx.strokeStyle = this.boarderColor;
-                        ctx.lineWidth = this.boarderWidth;
-                        ctx.stroke();
-                    }
-                } else {
-                    ctx.fillRect(0, 0, this.width, this.height);
-                    this.draw(ctx);
-                    if (this.boarderWidth != 0) {
-                        ctx.strokeStyle = this.boarderColor;
-                        ctx.lineWidth = this.boarderWidth;
-                        ctx.strokeRect(0, 0, this.width, this.height);
-                    }
+                ctx.fillRect(0, 0, this.width, this.height);
+                this.draw(ctx);
+                if (this.boarderWidth != 0) {
+                    ctx.strokeStyle = this.boarderColor;
+                    ctx.lineWidth = this.boarderWidth;
+                    ctx.strokeRect(0, 0, this.width, this.height);
                 }
             }
             ctx.restore();
@@ -3317,6 +3314,17 @@ var View = function (_BaseObject) {
         set: function set(newValue) {
             if (this._clipToBounds != newValue) {
                 this._clipToBounds = newValue;
+                this._checkAndSetNeedsRender();
+            }
+        }
+    }, {
+        key: 'cornerRadius',
+        get: function get() {
+            return this._cornerRadius;
+        },
+        set: function set(newValue) {
+            if (this._cornerRadius != newValue) {
+                this._cornerRadius = newValue;
                 this._checkAndSetNeedsRender();
             }
         }

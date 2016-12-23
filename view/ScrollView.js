@@ -14,6 +14,7 @@ class ScrollViewIndicator extends View {
         this.cornerRadius = 3
         this.timeoutID = nil
         this.alpha = 0
+        this.clipToBounds = true
     }
 
     flash() {
@@ -157,23 +158,12 @@ export default class ScrollView extends View {
             ctx.shadowBlur = this.shadowBlur
             ctx.shadowOffset = this.shadowOffset
             ctx.fillStyle = this.backgroundColor;
-            if (this.cornerRadius != 0) {
-                ctx.radiusRect(0, 0, this.contentSize.width, this.contentSize.height, this.cornerRadius)
-                ctx.fill()
-                this.draw(ctx)
-                if (this.boarderWidth != 0) {
-                    ctx.strokeStyle = this.boarderColor
-                    ctx.lineWidth = this.boarderWidth
-                    ctx.stroke()
-                }
-            } else {
-                ctx.fillRect(0, 0, this.contentSize.width, this.contentSize.height)
-                this.draw(ctx)
-                if (this.boarderWidth != 0) {
-                    ctx.strokeStyle = this.boarderColor
-                    ctx.lineWidth = this.boarderWidth
-                    ctx.strokeRect(0, 0, this.contentSize.width, this.contentSize.height)
-                }
+            ctx.fillRect(0, 0, this.contentSize.width, this.contentSize.height)
+            this.draw(ctx)
+            if (this.boarderWidth != 0) {
+                ctx.strokeStyle = this.boarderColor
+                ctx.lineWidth = this.boarderWidth
+                ctx.strokeRect(0, 0, this.contentSize.width, this.contentSize.height)
             }
         }
         ctx.restore()

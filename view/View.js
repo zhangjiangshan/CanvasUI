@@ -9,27 +9,37 @@ import {AnimationModel} from './Animator'
 export default class View extends BaseObject {
     constructor(x=0, y=0, width=0, height=0) {
         super()
-        this._backgroundColor = "#00a488"
+        // frame
         this._offset = new Point()
         this._position = new Point(x, y)
         this._size = new Size(width, height)
-        this._alpha = 1
-        this.backgroundAlpha = 1
-        this.subviews = new Array()
         this.autoresizingMask = ViewAutoresizing.None
+
+        // color
+        this._backgroundColor = "#00a488"
+        this.backgroundAlpha = 1
+        this._alpha = 1
+
+        // views
+        this.subviews = new Array()
         this.superview = nil
         this.window = nil
         this.userInteractionEnabled = true
+
+        // clip
         this._clipToBounds = false
-        this.cornerRadius = 0
-        //boarder && shadow
+        this._cornerRadius = 0   // work with clipToBounds=true
+
+        // boarder
         this._boarderColor = nil
         this._boarderWidth = 0
 
+        // shadow
         this._shadowBlur = 0
         this._shadowColor = "black"
         this._shadowOffset = new Point()
 
+        // animation
         this.animations = new Array()
         this.an_position = nil
         this.an_size = nil
@@ -92,6 +102,16 @@ export default class View extends BaseObject {
     set clipToBounds(newValue){
         if (this._clipToBounds != newValue) {
             this._clipToBounds = newValue
+            this._checkAndSetNeedsRender()
+        }
+    }
+
+    get cornerRadius() {
+        return this._cornerRadius;
+    }
+    set cornerRadius(newValue){
+        if (this._cornerRadius != newValue) {
+            this._cornerRadius = newValue
             this._checkAndSetNeedsRender()
         }
     }
@@ -292,8 +312,8 @@ export default class View extends BaseObject {
     }
 
     getContext() {
-        const canvas = document.getElementById("canvas");
-        return canvas.getContext("2d");
+        const canvas = document.getElementById("canvas")
+        return canvas.getContext("2d")
     }
 
     bringSubviewToFront(view) {
@@ -452,11 +472,15 @@ export default class View extends BaseObject {
     }
 
     _render() {
-        //console.log(`render:${this.toString()}`)
         const ctx = new CGContext(this)
         ctx.save()
         if (this.clipToBounds) {
-            ctx.clip({position:(new Point()), size:this.size.copy()}, false)
+            if (this.cornerRadius != 0) {
+                ctx.radiusRect(0, 0, this.width, this.height, this.cornerRadius)
+                ctx.clip()
+            } else {
+                ctx.clip({position:(new Point()), size:this.size.copy()}, false)
+            }
         }
         ctx.alpha = ctx.alpha * this.alpha
         if (ctx.alpha != 0) {
@@ -480,23 +504,12 @@ export default class View extends BaseObject {
             ctx.shadowBlur = this.shadowBlur
             ctx.shadowOffset = this.shadowOffset
             ctx.fillStyle = this.backgroundColor;
-            if (this.cornerRadius != 0) {
-                ctx.radiusRect(0, 0, this.width, this.height, this.cornerRadius)
-                ctx.fill()
-                this.draw(ctx)
-                if (this.boarderWidth != 0) {
-                    ctx.strokeStyle = this.boarderColor
-                    ctx.lineWidth = this.boarderWidth
-                    ctx.stroke()
-                }
-            } else {
-                ctx.fillRect(0, 0, this.width, this.height)
-                this.draw(ctx)
-                if (this.boarderWidth != 0) {
-                    ctx.strokeStyle = this.boarderColor
-                    ctx.lineWidth = this.boarderWidth
-                    ctx.strokeRect(0, 0, this.width, this.height)
-                }
+            ctx.fillRect(0, 0, this.width, this.height)
+            this.draw(ctx)
+            if (this.boarderWidth != 0) {
+                ctx.strokeStyle = this.boarderColor
+                ctx.lineWidth = this.boarderWidth
+                ctx.strokeRect(0, 0, this.width, this.height)
             }
         }
         ctx.restore()
