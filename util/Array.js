@@ -35,10 +35,6 @@ Array.prototype.swap = function(index1, index2) {
     return array
 }
 
-Array.prototype.swap = function(index1, index2) {
-    let array = this.slice()
-    let obj = this[index1]
-    this[index1] = this[index2]
-    this[index2] = obj
-    return array
-}
+Array.prototype.insert = function (index, item) {
+    this.splice(index, 0, item);
+};

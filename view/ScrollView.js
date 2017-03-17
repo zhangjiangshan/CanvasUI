@@ -6,7 +6,7 @@ import TouchEvent from './TouchEvent'
 import BezierPath from './BezierPath'
 import {AnimatAction} from '../view/Animator'
 
-class ScrollViewIndicator extends View {
+export default class ScrollViewIndicator extends View {
     constructor(x=0, y=0, width=5, height=64) {
         super(x, y, width, height)
         this.backgroundAlpha = 0.6

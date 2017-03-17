@@ -90,6 +90,24 @@ export class Frame {
         this.origin = new Point(x, y)
         this.size = new Size(width, height)
     }
+    get x() {
+        return this.origin.x
+    }
+    get y() {
+        return this.origin.y
+    }
+    get width() {
+        return this.size.width
+    }
+    get height() {
+        return this.size.height
+    }
+    get maxX() {
+        return this.origin.x + this.size.width
+    }
+    get maxY() {
+        return this.origin.y + this.size.height
+    }
     valueOf() {
         return JSON.stringify(this)
     }
@@ -103,6 +121,27 @@ export class Frame {
         return new Frame(this.origin.x, this.origin.y, this.size.width, this.size.height)
     }
 
+}
+
+export class IndexPath {
+    constructor(row = 0, section = 0) {
+        if (arguments.length == 1) { // 传参为JSON.stringify(this)
+            JSON.parse(row, function (k, v) {
+                this[k] = v
+            })
+        } else {
+            this.row = row
+            this.section = section
+        }
+    }
+
+    valueOf() {
+        return JSON.stringify(this)
+    }
+
+    copy() {
+        return new IndexPath(this.row, this.section)
+    }
 }
 
 export function isPointIn(point, position, size) {
@@ -119,4 +158,9 @@ export const ViewAutoresizing = {
     FlexibleTopMargin:     1 << 3,
     FlexibleHeight:        1 << 4,
     FlexibleBottomMargin:  1 << 5
+};
+
+export const Direction = {
+    Horizontal:  0,
+    Vertical:    1
 };
