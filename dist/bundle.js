@@ -11,7 +11,46 @@ var _Window2 = _interopRequireDefault(_Window);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"./util/Array":3,"./view/Window":19}],2:[function(require,module,exports){
+},{"./util/Array":4,"./view/Window":21}],2:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _View2 = require('../view/View');
+
+var _View3 = _interopRequireDefault(_View2);
+
+var _Geometry = require('../view/Geometry');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var HomeView = function (_View) {
+    _inherits(HomeView, _View);
+
+    function HomeView() {
+        _classCallCheck(this, HomeView);
+
+        var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(HomeView).call(this));
+
+        _this.backgroundColor = "red";
+        _this.autoresizingMask = _Geometry.ViewAutoresizing.FlexibleWidth | _Geometry.ViewAutoresizing.FlexibleHeight;
+        return _this;
+    }
+
+    return HomeView;
+}(_View3.default);
+
+exports.default = HomeView;
+
+},{"../view/Geometry":14,"../view/View":20}],3:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -39,6 +78,12 @@ var _Button2 = _interopRequireDefault(_Button);
 var _ScrollView = require('../view/ScrollView');
 
 var _ScrollView2 = _interopRequireDefault(_ScrollView);
+
+var _Navigator = require('../view/Navigator');
+
+var _HomeView = require('./HomeView');
+
+var _HomeView2 = _interopRequireDefault(_HomeView);
 
 var _Animator = require('../view/Animator');
 
@@ -103,7 +148,7 @@ var RootView = function (_View) {
         button.setBackgroundColor("red", _Button.ControlState.Highlighted);
         button.setTitle("按钮", _Button.ControlState.Normal);
         _this.addSubview(button);
-        button.target = self;
+        button.target = _this;
         button.func = function () {
             var animation = new _Animator.AnimatAction(imageView2, "position", new _Geometry.Point(imageView2.x + 330, 200), 3);
             var animation1 = new _Animator.AnimatAction(imageView3, "position", new _Geometry.Point(imageView3.x + 330, 300), 3);
@@ -114,6 +159,23 @@ var RootView = function (_View) {
 
             //imageView2.position = new Point(imageView2.x - 4, 200)
         };
+
+        var button2 = new _Button2.default();
+        button2.size = new _Geometry.Size(44, 44);
+        button2.position = new _Geometry.Point(100, 300);
+        button2.setBackgroundColor("blue", _Button.ControlState.Normal);
+        button2.setBackgroundColor("red", _Button.ControlState.Highlighted);
+        button2.setTitle("push", _Button.ControlState.Normal);
+        button2.target = _this;
+
+        _this.addSubview(button2);
+        button2.func = function () {
+            var homeView = new _HomeView2.default();
+            homeView.size = _this.size.copy();
+            var navigator = new _Navigator.PushNavigator(_this, homeView);
+            navigator.invoke(0.3);
+        };
+
         return _this;
     }
 
@@ -122,7 +184,7 @@ var RootView = function (_View) {
 
 exports.default = RootView;
 
-},{"../view/Animator":6,"../view/Button":9,"../view/Geometry":13,"../view/ImageView":14,"../view/Label":15,"../view/ScrollView":16,"../view/View":18}],3:[function(require,module,exports){
+},{"../view/Animator":7,"../view/Button":10,"../view/Geometry":14,"../view/ImageView":15,"../view/Label":16,"../view/Navigator":17,"../view/ScrollView":18,"../view/View":20,"./HomeView":2}],4:[function(require,module,exports){
 "use strict";
 
 Array.prototype.indexOfOld = Array.prototype.indexOf;
@@ -160,15 +222,11 @@ Array.prototype.swap = function (index1, index2) {
     return array;
 };
 
-Array.prototype.swap = function (index1, index2) {
-    var array = this.slice();
-    var obj = this[index1];
-    this[index1] = this[index2];
-    this[index2] = obj;
-    return array;
+Array.prototype.insert = function (index, item) {
+    this.splice(index, 0, item);
 };
 
-},{}],4:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 /*
  * Tween.js
  * t: current time（当前时间）；
@@ -354,7 +412,7 @@ var Tween = exports.Tween = {
 };
 //Math.tween = Tween;
 
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 
 "use strict";
 
@@ -375,7 +433,7 @@ function copy(object) {
     return Object.assign({}, object);
 }
 
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 'use strict';
 "use stirct";
 
@@ -831,7 +889,7 @@ var AnimatAction = exports.AnimatAction = function (_AnimationBase3) {
     return AnimatAction;
 }(AnimationBase);
 
-},{"../util/Tween":4,"../util/Util":5,"./Drawloop":11}],7:[function(require,module,exports){
+},{"../util/Tween":5,"../util/Util":6,"./Drawloop":12}],8:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -878,7 +936,7 @@ var BaseObject = function () {
 
 exports.default = BaseObject;
 
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1073,7 +1131,7 @@ var BezierPath = function () {
 
 exports.default = BezierPath;
 
-},{"../util/Util.js":5,"./Animator":6,"./BaseObject":7,"./CGContext":10,"./Drawloop":11,"./Geometry":13}],9:[function(require,module,exports){
+},{"../util/Util.js":6,"./Animator":7,"./BaseObject":8,"./CGContext":11,"./Drawloop":12,"./Geometry":14}],10:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1262,7 +1320,7 @@ var Button = function (_View) {
 
 exports.default = Button;
 
-},{"../util/Util":5,"./Font":12,"./Geometry":13,"./ImageView":14,"./Label":15,"./View":18}],10:[function(require,module,exports){
+},{"../util/Util":6,"./Font":13,"./Geometry":14,"./ImageView":15,"./Label":16,"./View":20}],11:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1739,7 +1797,7 @@ var CGContext = function () {
 
 exports.default = CGContext;
 
-},{"../util/Util.js":5,"./Geometry":13}],11:[function(require,module,exports){
+},{"../util/Util.js":6,"./Geometry":14}],12:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1802,7 +1860,7 @@ var Drawloop = function () {
 
 var drawloop = exports.drawloop = new Drawloop();
 
-},{"../util/Util.js":5}],12:[function(require,module,exports){
+},{"../util/Util.js":6}],13:[function(require,module,exports){
 "use strict";
 
 /*
@@ -1853,7 +1911,7 @@ var Font = function () {
 
 exports.default = Font;
 
-},{}],13:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2034,9 +2092,72 @@ var Frame = exports.Frame = function () {
         value: function copy() {
             return new Frame(this.origin.x, this.origin.y, this.size.width, this.size.height);
         }
+    }, {
+        key: "x",
+        get: function get() {
+            return this.origin.x;
+        }
+    }, {
+        key: "y",
+        get: function get() {
+            return this.origin.y;
+        }
+    }, {
+        key: "width",
+        get: function get() {
+            return this.size.width;
+        }
+    }, {
+        key: "height",
+        get: function get() {
+            return this.size.height;
+        }
+    }, {
+        key: "maxX",
+        get: function get() {
+            return this.origin.x + this.size.width;
+        }
+    }, {
+        key: "maxY",
+        get: function get() {
+            return this.origin.y + this.size.height;
+        }
     }]);
 
     return Frame;
+}();
+
+var IndexPath = exports.IndexPath = function () {
+    function IndexPath() {
+        var row = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+        var section = arguments.length <= 1 || arguments[1] === undefined ? 0 : arguments[1];
+
+        _classCallCheck(this, IndexPath);
+
+        if (arguments.length == 1) {
+            // 传参为JSON.stringify(this)
+            JSON.parse(row, function (k, v) {
+                this[k] = v;
+            });
+        } else {
+            this.row = row;
+            this.section = section;
+        }
+    }
+
+    _createClass(IndexPath, [{
+        key: "valueOf",
+        value: function valueOf() {
+            return JSON.stringify(this);
+        }
+    }, {
+        key: "copy",
+        value: function copy() {
+            return new IndexPath(this.row, this.section);
+        }
+    }]);
+
+    return IndexPath;
 }();
 
 function isPointIn(point, position, size) {
@@ -2055,7 +2176,12 @@ var ViewAutoresizing = exports.ViewAutoresizing = {
     FlexibleBottomMargin: 1 << 5
 };
 
-},{}],14:[function(require,module,exports){
+var Direction = exports.Direction = {
+    Horizontal: 0,
+    Vertical: 1
+};
+
+},{}],15:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2203,7 +2329,7 @@ var ImageView = function (_View) {
 
 exports.default = ImageView;
 
-},{"../util/Util":5,"./CGContext":10,"./Geometry":13,"./View":18}],15:[function(require,module,exports){
+},{"../util/Util":6,"./CGContext":11,"./Geometry":14,"./View":20}],16:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2428,7 +2554,142 @@ var Label = function (_View) {
 
 exports.default = Label;
 
-},{"../util/Util":5,"./Font":12,"./Geometry":13,"./View":18}],16:[function(require,module,exports){
+},{"../util/Util":6,"./Font":13,"./Geometry":14,"./View":20}],17:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.PushNavigator = exports.AlphaNavigator = exports.Navigator = undefined;
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _Util = require('../util/Util');
+
+var _BaseObject2 = require('./BaseObject');
+
+var _BaseObject3 = _interopRequireDefault(_BaseObject2);
+
+var _View = require('./View');
+
+var _View2 = _interopRequireDefault(_View);
+
+var _Geometry = require('./Geometry');
+
+var _Animator = require('../view/Animator');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Navigator = exports.Navigator = function (_BaseObject) {
+  _inherits(Navigator, _BaseObject);
+
+  function Navigator() {
+    var from = arguments.length <= 0 || arguments[0] === undefined ? _Util.nil : arguments[0];
+    var to = arguments.length <= 1 || arguments[1] === undefined ? _Util.nil : arguments[1];
+    var container = arguments.length <= 2 || arguments[2] === undefined ? _Util.nil : arguments[2];
+
+    _classCallCheck(this, Navigator);
+
+    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Navigator).call(this));
+
+    _this._fromView = from;
+    _this._toView = to;
+    _this._containerView = container;
+    return _this;
+  }
+
+  _createClass(Navigator, [{
+    key: 'invoke',
+    value: function invoke(duration) {
+      assert(false, this.className() + 'must implement invoke()');
+    }
+  }, {
+    key: 'fromView',
+    get: function get() {
+      return this._fromView;
+    },
+    set: function set(newValue) {
+      if (this._fromView != newValue) {
+        this._fromView = newValue;
+      }
+    }
+  }, {
+    key: 'toView',
+    get: function get() {
+      return this._toView;
+    },
+    set: function set(newValue) {
+      if (this._toView != newValue) {
+        this._toView = newValue;
+      }
+    }
+  }, {
+    key: 'containerView',
+    get: function get() {
+      return this._containerView || this.fromView.superview;
+    },
+    set: function set(newValue) {
+      if (this._containerView != newValue) {
+        this._containerView = newValue;
+      }
+    }
+  }]);
+
+  return Navigator;
+}(_BaseObject3.default);
+
+var AlphaNavigator = exports.AlphaNavigator = function (_Navigator) {
+  _inherits(AlphaNavigator, _Navigator);
+
+  function AlphaNavigator() {
+    _classCallCheck(this, AlphaNavigator);
+
+    return _possibleConstructorReturn(this, Object.getPrototypeOf(AlphaNavigator).apply(this, arguments));
+  }
+
+  _createClass(AlphaNavigator, [{
+    key: 'invoke',
+    value: function invoke(duration) {
+      this.toView.position = this.fromView.position.copy();
+      this.toView.alpha = 0;
+      this.containerView.addSubview(this.toView);
+      var animation = new _Animator.AnimatAction(this.toView, "alpha", 1, duration, _Animator.AnimationCurve.CurveEaseIn);
+      animation.start();
+    }
+  }]);
+
+  return AlphaNavigator;
+}(Navigator);
+
+var PushNavigator = exports.PushNavigator = function (_Navigator2) {
+  _inherits(PushNavigator, _Navigator2);
+
+  function PushNavigator() {
+    _classCallCheck(this, PushNavigator);
+
+    return _possibleConstructorReturn(this, Object.getPrototypeOf(PushNavigator).apply(this, arguments));
+  }
+
+  _createClass(PushNavigator, [{
+    key: 'invoke',
+    value: function invoke(duration) {
+      this.toView.position = new _Geometry.Point(this.fromView.position.x + this.fromView.size.width, this.toView.position.y);
+      this.containerView.addSubview(this.toView);
+      var animation = new _Animator.AnimatAction(this.toView, "position", this.fromView.position.copy(), duration, _Animator.AnimationCurve.CurveEaseIn);
+      animation.start();
+    }
+  }]);
+
+  return PushNavigator;
+}(Navigator);
+
+},{"../util/Util":6,"../view/Animator":7,"./BaseObject":8,"./Geometry":14,"./View":20}],18:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2509,6 +2770,8 @@ var ScrollViewIndicator = function (_View) {
 
     return ScrollViewIndicator;
 }(_View4.default);
+
+exports.default = ScrollViewIndicator;
 
 var ScrollView = function (_View2) {
     _inherits(ScrollView, _View2);
@@ -2675,7 +2938,7 @@ var ScrollView = function (_View2) {
 
 exports.default = ScrollView;
 
-},{"../util/Util":5,"../view/Animator":6,"./BezierPath":8,"./Geometry":13,"./TouchEvent":17,"./View":18}],17:[function(require,module,exports){
+},{"../util/Util":6,"../view/Animator":7,"./BezierPath":9,"./Geometry":14,"./TouchEvent":19,"./View":20}],19:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2701,7 +2964,7 @@ var TouchEvent = function TouchEvent() {
 
 exports.default = TouchEvent;
 
-},{"../util/Util":5,"./Geometry":13}],18:[function(require,module,exports){
+},{"../util/Util":6,"./Geometry":14}],20:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3454,7 +3717,7 @@ var View = function (_BaseObject) {
 
 exports.default = View;
 
-},{"../util/Util.js":5,"./Animator":6,"./BaseObject":7,"./CGContext":10,"./Drawloop":11,"./Geometry":13}],19:[function(require,module,exports){
+},{"../util/Util.js":6,"./Animator":7,"./BaseObject":8,"./CGContext":11,"./Drawloop":12,"./Geometry":14}],21:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3698,4 +3961,4 @@ if (typeof window != 'undefined') {
     })();
 }
 
-},{"../main/RootView":2,"../util/Util":5,"./Drawloop":11,"./Geometry":13,"./TouchEvent":17,"./View":18}]},{},[1]);
+},{"../main/RootView":3,"../util/Util":6,"./Drawloop":12,"./Geometry":14,"./TouchEvent":19,"./View":20}]},{},[1]);

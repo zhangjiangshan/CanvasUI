@@ -5,6 +5,8 @@ import Label from '../view/Label'
 import ImageView, {EqualRatio} from '../view/ImageView'
 import Button, {ControlState} from '../view/Button'
 import ScrollView from '../view/ScrollView'
+import {PushNavigator, AlphaNavigator} from '../view/Navigator'
+import HomeView from './HomeView'
 
 import {AnimatAction, ConcurrentAnimationQueue, SerialAnimationQueue} from '../view/Animator'
 
@@ -56,7 +58,7 @@ export default class RootView extends View {
         button.setBackgroundColor("red", ControlState.Highlighted)
         button.setTitle("按钮", ControlState.Normal)
         this.addSubview(button)
-        button.target = self
+        button.target = this
         button.func = () => {
             const animation = new AnimatAction(imageView2, "position", (new Point(imageView2.x+330, 200)), 3)
             const animation1 = new AnimatAction(imageView3, "position", (new Point(imageView3.x+330, 300)), 3)
@@ -67,5 +69,23 @@ export default class RootView extends View {
 
             //imageView2.position = new Point(imageView2.x - 4, 200)
         }
+
+        const button2 = new Button()
+        button2.size = new Size(44,44)
+        button2.position = new Point(100, 300)
+        button2.setBackgroundColor("blue", ControlState.Normal)
+        button2.setBackgroundColor("red", ControlState.Highlighted)
+        button2.setTitle("push", ControlState.Normal)
+        button2.target = this
+
+        this.addSubview(button2)
+        button2.func = () => {
+            const homeView = new HomeView()
+            homeView.size = this.size.copy()
+            const navigator = new PushNavigator(this, homeView)
+            navigator.invoke(0.3)
+        }
+
+
     }
 }
